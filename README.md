@@ -1,493 +1,521 @@
-<div align="center">
-  <img src="docs/assets/logo.png" alt="ForgeLens Logo" width="200"/>
-  <h1>ForgeLens</h1>
-  <p><strong>Deterministic Engineering Intelligence.</strong></p>
-  
-  [![Build Status](https://img.shields.io/github/actions/workflow/status/voidswift/Forge-Lens/ci.yml?branch=main)](https://github.com/voidswift/Forge-Lens/actions)
-  [![Coverage](https://img.shields.io/codecov/c/github/voidswift/Forge-Lens)](https://codecov.io/gh/voidswift/Forge-Lens)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-  [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
-  
-  <br />
-</div>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/voidswift/Forge-Lens/main/public/logo.png" width="200" alt="ForgeLens Logo" />
+</p>
 
-ForgeLens provides engineering leadership with deterministic visibility into codebase health and velocity, utilizing robust background reconciliation and selective semantic AI analysis.
+<h1 align="center">ForgeLens</h1>
 
+<p align="center">
+  <strong>The Deterministic Repository Intelligence & Analytics Engine.</strong><br/>
+  <em>Understand the true health, resilience, and operational reality of any codebase in under 60 seconds.</em>
+</p>
+
+<p align="center">
+  <a href="#status"><img src="https://img.shields.io/badge/Status-Beta_Readiness-blue.svg" alt="Status"></a>
+  <a href="#license"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
+  <a href="#architecture"><img src="https://img.shields.io/badge/Architecture-Event_Driven-purple.svg" alt="Architecture"></a>
+  <a href="#benchmarks"><img src="https://img.shields.io/badge/Performance_Budget-Active-red.svg" alt="Performance Budget"></a>
+  <a href="#stack"><img src="https://img.shields.io/badge/Stack-Next.js%20%7C%20Inngest%20%7C%20Drizzle-black.svg" alt="Stack"></a>
+</p>
+
+---
+
+## 📸 Demo
+
+*(Note: UI assets are populated during the Beta phase)*
+
+**Dashboard Preview**  
+A real-time overview of your imported repositories, displaying aggregated Health and Resilience scores.
+
+**Timeline Preview**  
+The raw event stream showing GitHub commits, pull requests, and ingestion checkpoints.
+
+**Architecture Preview**  
 ```mermaid
 graph LR
-    subgraph API [Next.js API]
-        Router[App Router]
-    end
-    subgraph Workers [Durable Workers]
-        Inngest[Inngest]
-    end
-    subgraph Data [Data Layer]
-        PG[(PostgreSQL)]
-    end
-    
-    UI((Dashboard)) --> Router
-    Router --> Inngest
-    Inngest --> PG
-    Inngest --> LLM[OpenAI]
+    A[GitHub Repo] -->|Stream| B(Inngest Worker)
+    B -->|Normalize| C[(PostgreSQL)]
+    B -->|Compute| D{Analytics Engine}
+    D -->|Produce| C
+    C --> E[Next.js App Router]
+    E --> F((User))
 ```
 
 ---
 
-## 1. Table of Contents
+## 📑 Table of Contents
 
-1. [Vision](#2-vision)
-2. [Product Overview](#3-product-overview)
-3. [Architecture Overview](#4-architecture-overview)
-4. [User Journey](#5-user-journey)
-5. [System Flow](#6-system-flow)
-6. [Data Flow](#7-data-flow)
-7. [Database](#8-database)
-8. [API](#9-api)
-9. [Dashboard](#10-dashboard)
-10. [Design System](#11-design-system)
-11. [AI Architecture](#12-ai-architecture)
-12. [GitHub Integration](#13-github-integration)
-13. [Security](#14-security)
-14. [Performance](#15-performance)
-15. [Folder Structure](#16-folder-structure)
-16. [Development Workflow](#17-development-workflow)
-17. [Deployment](#18-deployment)
-18. [Monitoring](#19-monitoring)
-19. [Testing](#20-testing)
-20. [Roadmap](#21-roadmap)
-21. [Business Model](#22-business-model)
-22. [Contributing](#23-contributing)
-23. [FAQ](#24-faq)
-24. [Glossary](#25-glossary)
-25. [References](#26-references)
-26. [License](#27-license)
+1. [What is ForgeLens?](#what-is-forgelens)
+2. [Why ForgeLens Exists](#why-forgelens-exists)
+3. [Core Principles](#core-principles)
+4. [Features](#features)
+5. [Repository Architecture](#repository-architecture)
+6. [System Architecture](#system-architecture)
+7. [Request Lifecycle](#request-lifecycle)
+8. [Data Flow](#data-flow)
+9. [Sync Engine](#sync-engine)
+10. [Analytics Engine](#analytics-engine)
+11. [AI Architecture](#ai-architecture)
+12. [Database](#database)
+13. [Security](#security)
+14. [Performance](#performance)
+15. [Testing](#testing)
+16. [DevOps](#devops)
+17. [Project Structure](#project-structure)
+18. [Technology Stack](#technology-stack)
+19. [Engineering Decisions](#engineering-decisions)
+20. [API](#api)
+21. [GitHub Integration](#github-integration)
+22. [Benchmarks](#benchmarks)
+23. [Documentation](#documentation)
+24. [ForgeLens Labs](#forgelens-labs)
+25. [Roadmap](#roadmap)
+26. [Known Limitations](#known-limitations)
+27. [FAQ](#faq)
+28. [Contributing](#contributing)
+29. [License](#license)
+30. [Acknowledgements](#acknowledgements)
+31. [Final Engineering Statement](#final-engineering-statement)
 
 ---
 
-## 2. Vision
+## 🔍 What is ForgeLens?
 
-### Why ForgeLens Exists
-Engineering leadership lacks visibility into the granular health of their repositories. Existing tools rely on vanity metrics (lines of code) or invasive surveillance (time-tracking). ForgeLens exists to surface structural codebase health through deterministic Git metadata.
+### The Problem
+GitHub tells you what happened. It tells you who committed code, when a PR was merged, and how many stars a project has. It does **not** tell you if the project is healthy, if the maintainers are burning out, or if the repository is entirely dependent on a single developer who hasn't logged in for 90 days. 
 
-### Problem
-Organizations cannot quantify technical debt accumulation or review bottlenecks without manual audits, leading to delayed releases and developer burnout.
+### The Vision
+To build a deterministic, explainable analytics engine that translates raw version control events into actionable operational intelligence.
 
-### Solution
-An event-driven intelligence platform that ingests GitHub data via durable queues, aggregates metrics using Postgres Materialized Views, and utilizes LLMs strictly for semantic clustering of pull requests.
+### The Mission
+Give Engineering Managers, Open Source Maintainers, and Tech Leads the ability to measure the exact resilience of a codebase before adopting it into production. 
 
-### Mission
-Replace engineering intuition with evidence.
-
-### Goals
-- Process 100,000+ commit repositories without ingestion timeouts.
-- Serve dashboard analytics in < 50ms.
-- Guarantee 100% data consistency via cron reconciliation.
+### Target Users
+- **Engineering Managers:** Identifying bus factors and burnout in internal teams.
+- **OSS Maintainers:** Tracking community health and contributor pipelines.
+- **Enterprise Architects:** Vetting open-source dependencies for long-term viability.
 
 ### Non-Goals
-- Individual developer surveillance or stack-ranking.
-- Predictive burnout analysis (HR risk).
-- CI/CD pipeline execution.
-
-### Engineering Philosophy
-Boring technology scales. We prefer Postgres Materialized Views over Kafka for MVP. We prefer durable execution (Inngest) over complex microservices. We isolate business logic from presentation frameworks.
+- We are not a CI/CD platform.
+- We are not a project management tool (Jira/Linear).
+- We do not use AI to "guess" health scores. Magic is prohibited in the core engine.
 
 ---
 
-## 3. Product Overview
+## ❓ Why ForgeLens Exists
 
-### Features and Workflows
+### The History and Pain Points
+Historically, evaluating a repository meant manually scanning contributor graphs, checking the date of the last merged PR, and hoping the primary author wouldn't abandon the project. Existing solutions either focus purely on vanity metrics (stars, forks) or employ black-box AI that hallucinates "sentiment" without providing cryptographic proof of the calculation.
 
-#### Guest Mode
-Unauthenticated users view public repository metrics. The system serves these requests from edge caches, restricting historical depth to 30 days to prevent abuse.
-
-#### Repository Dashboard
-The primary view for a specific repository. Displays the 4-card metric grid (Velocity, Open PRs, Merged PRs, Contributors) powered by pre-aggregated database views. 
-
-#### Workspace
-The authenticated landing page. Lists all tracked repositories for the tenant. Enables triggering asynchronous synchronization via the `syncRepositories` action.
-
-#### Insights
-The semantic AI dashboard. Users request an analysis of a time range. The system queries the `domain-analytics` package for raw commits/PRs, feeds them to the `@forgelens/ai` package, and streams a Markdown report detailing architectural themes and technical debt patterns.
-
-#### Alerts
-Configurable thresholds (e.g., "PR merge time > 48 hours"). Evaluated asynchronously during the nightly reconciliation cron.
-
-#### Reports
-PDF exports of weekly velocity metrics generated via Puppeteer in a background worker.
-
-#### Contributors
-Leaderboards based on PR velocity and review participation. Ranked deterministically via SQL dense_rank functions.
+### Why ForgeLens is Different
+ForgeLens treats repository metadata as a continuous, append-only event stream. We don't summarize data; we compile it. Every score—Health, Bus Factor, Resilience—is backed by deterministic evidence strings that point directly to the raw data. If ForgeLens says a repository has a Bus Factor of 1, it will tell you exactly *who* that person is and *why* their absence would freeze the project.
 
 ---
 
-## 4. Architecture Overview
+## ⚖️ Core Principles
 
-ForgeLens uses a strictly enforced Modular Monolith architecture.
+ForgeLens is governed by strict engineering philosophies:
 
-```mermaid
-mindmap
-  root((ForgeLens))
-    Apps
-      web (Next.js)
-    Packages
-      domain-analytics
-      db (Drizzle)
-      github (Octokit)
-      ai (Vercel AI SDK)
-    Infrastructure
-      Postgres (Neon)
-      Inngest (Durable Execution)
-      Clerk (Auth)
+1. **Evidence over Intuition:** Every metric must be mathematically provable.
+2. **LLMs Never Compute Truth:** AI is for querying and summarization (TCGE Labs), never for generating core analytics or health scores.
+3. **Constant-Memory Ingestion:** Systems must scale to `torvalds/linux` without Out-Of-Memory (OOM) kills. We stream, normalize, persist, and discard.
+4. **Idempotency is Mandatory:** If a worker dies, it resumes from a cursor. It never restarts from zero.
+5. **Back-Pressure:** The queue yields to the database. We do not DDOS our own infrastructure.
+6. **Zero-Downtime Projections (CQRS-lite):** Analytics algorithms are versioned. Migrations are non-destructive replays.
+7. **Performance Budgets:** CI fails if Node memory exceeds 500MB or queue latency exceeds 5 seconds.
+8. **Docs as Code:** Architecture is strictly tracked in ADRs. Failure is tracked in Blameless Postmortems.
+
+---
+
+## ✨ Features
+
+### Current (Beta)
+- **Repository Import:** Stream-based ingestion of GitHub commits and PRs.
+- **Health Engine:** Deterministic scoring across Velocity, Activity, Responsiveness, and Maintenance.
+- **Resilience Engine:** Operational risk scoring including Bus Factor, Knowledge Distribution, Review Coverage, and Contributor Freshness.
+- **Contributor Intelligence:** Automated classification of core maintainers, flight risks, and domain experts.
+- **Historical Snapshots:** Time-series tracking of repository health.
+- **Debug Console:** Hidden admin view for tracking ingestion cursors, rate-limits, and memory pressure.
+
+### Future / Experimental (Labs)
+- **Temporal Code Graph Engine (TCGE):** A multi-dimensional AST database tracking how code relationships evolve over time.
+- **AI Query Gateway:** Natural language interfaces to interrogate the TCGE (e.g., "When did we introduce the memory leak in the billing module?").
+- **Slack / GitLab Integrations:** Multi-provider ingestion streams.
+
+---
+
+## 📂 Repository Architecture
+
+ForgeLens is a strict Monorepo powered by Turborepo and PNPM workspaces.
+
+```text
+Forge-Lens/
+├── apps/
+│   └── web/                 # Next.js 14 App Router, UI, Server Actions, Inngest Workers
+├── packages/
+│   ├── db/                  # PostgreSQL schema, Drizzle ORM, Migrations
+│   ├── domain-analytics/    # Pure TS algorithms (Health, Resilience, Contributors)
+│   ├── github/              # Streaming Octokit client, Rate limit throttler
+│   ├── ui/                  # Shared React components, Tailwind config
+│   └── config/              # Shared ESLint, TSConfig settings
+├── benchmark/               # Operational V8 traces and historical JSON performance
+├── docs/                    # ADRs, Postmortems, Release Gates, Product Truth
+└── .github/                 # Actions, Strict PR Templates
 ```
 
-### Layered Architecture
-- **Presentation:** `apps/web` handles routing, JSX rendering, and request validation.
-- **Domain:** `packages/domain-*` contains pure TypeScript business rules.
-- **Infrastructure:** `packages/db`, `packages/github` handle I/O and external provider contracts.
+### Bounded Contexts
+- `apps/web` handles **transport** (HTTP, UI, Jobs).
+- `packages/db` handles **persistence**.
+- `packages/domain-analytics` handles **business logic**. It is strictly decoupled from the database and the UI. It accepts plain JSON objects and returns deterministic scores.
 
-### Background Workers
-Long-running tasks (initial sync, webhook processing, nightly reconciliation) are offloaded to Inngest to bypass Serverless execution limits.
+---
+
+## 🏛️ System Architecture
+
+ForgeLens is built on an Event-Driven, CQRS-lite architecture.
 
 ```mermaid
 graph TD
-    A[Webhook] --> B[Next.js API]
-    B --> C{Inngest Queue}
-    C --> D[Sync Worker]
-    D --> E[(Postgres)]
+    User([User]) -->|Imports Repo| Web[Next.js API]
+    Web -->|Fires Event| Redis[(Redis Queue)]
+    Redis -->|Consumes| Worker[Inngest Worker]
+    
+    Worker -->|Fetch Stream| GitHub[GitHub API]
+    GitHub -->|Yields Pages| Worker
+    
+    Worker -->|Batch Inserts| DB[(PostgreSQL Primary)]
+    
+    Worker -->|Queries Raw Events| Analytics[Domain Analytics]
+    Analytics -->|Calculates v0.1| Projections[DB Snapshots]
+    
+    Projections --> UI[Next.js Dashboard]
+    UI --> User
 ```
+
+### Flow Breakdown
+1. **Frontend:** React Server Components (RSC) query read-only PostgreSQL projections.
+2. **Backend:** Next.js Server Actions validate input via Zod and dispatch events to Inngest.
+3. **Workers:** Serverless functions that orchestrate streaming ingestion, applying Octokit backoff on 429s.
+4. **Database:** Drizzle ORM on PostgreSQL, heavily indexed on `repositoryId`.
 
 ---
 
-## 5. User Journey
+## 🔄 Request Lifecycle
 
-```mermaid
-journey
-    title Authenticated User Onboarding
-    section Setup
-      Sign Up: 5: User
-      Connect GitHub: 4: User, Clerk
-    section Import
-      Select Repository: 5: User
-      Queue Sync: 5: System
-      Poll Status: 3: User
-    section Value
-      View Dashboard: 5: User
-      Generate AI Report: 5: User, System
-```
-
----
-
-## 6. System Flow
-
-### Repository Import Sequence
+When a user clicks "Import":
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Web
-    participant Inngest
-    participant GitHub
-    participant DB
+    participant U as User
+    participant A as Next.js API
+    participant I as Inngest Queue
+    participant W as Sync Worker
+    participant G as GitHub API
+    participant D as PostgreSQL
+    participant E as Analytics Engine
 
-    User->>Web: POST /api/repos/sync
-    Web->>DB: Insert Repository Metadata
-    Web->>Inngest: Send repository/sync event
-    Web-->>User: 202 Accepted
-    Inngest->>GitHub: Fetch Commits (Paginated)
-    GitHub-->>Inngest: Commit Data
-    Inngest->>DB: Upsert Commits
-    Inngest->>DB: Update lastSyncedAt
-```
-
-### AI Report State Machine
-
-```mermaid
-stateDiagram-v2
-    [*] --> RequestReceived
-    RequestReceived --> FetchingContext
-    FetchingContext --> ContextReady
-    ContextReady --> PromptGeneration
-    PromptGeneration --> OpenAIRequest
-    OpenAIRequest --> StreamingResponse
-    StreamingResponse --> [*]
-```
-
----
-
-## 7. Data Flow
-
-```mermaid
-flowchart LR
-    GH[GitHub Webhook] --> API[Next API]
-    API --> Queue[Inngest Queue]
-    Queue --> Worker[Worker Node]
-    Worker --> WriteDB[(Postgres Tables)]
-    WriteDB --> MatView[(Materialized Views)]
-    MatView --> Dash[Dashboard UI]
-```
-
-Data flows unidirectionally from external providers into the durable queue, is written to append-heavy tables (`commits`, `pull_requests`), and is periodically aggregated into Materialized Views for rapid read operations.
-
----
-
-## 8. Database
-
-We utilize Postgres via Drizzle ORM. 
-
-### Entity Relationship Diagram
-
-```mermaid
-erDiagram
-    USERS {
-        string id PK
-        string email
-        string github_token "Encrypted AES-256"
-    }
-    REPOSITORIES {
-        string id PK
-        string user_id FK
-        string full_name
-        timestamp last_synced_at
-    }
-    COMMITS {
-        string sha PK
-        string repository_id FK
-        string message
-        timestamp timestamp
-    }
-    PULL_REQUESTS {
-        int id PK
-        string repository_id FK
-        string state
-        timestamp updated_at
-    }
+    U->>A: POST /import { repo: "torvalds/linux" }
+    A->>D: Create Repository (isSyncing: true)
+    A->>I: Event: repository/sync
+    A-->>U: 202 Accepted (Redirect to Dashboard)
     
-    USERS ||--o{ REPOSITORIES : tracks
-    REPOSITORIES ||--o{ COMMITS : contains
-    REPOSITORIES ||--o{ PULL_REQUESTS : manages
-```
-
-### Constraints and Security
-- **Foreign Keys:** Cascading deletes ensure orphan records are destroyed if a repository is untracked.
-- **Indexes:** Composite indexes on `(repository_id, timestamp)` and `(repository_id, state)` prevent full table scans.
-- **Encryption:** `github_token` utilizes a Drizzle custom type for AES-256-GCM encryption at rest.
-
----
-
-## 9. API
-
-### Contracts
-
-#### `POST /api/webhooks/github`
-Receives GitHub payload. Validates HMAC-SHA256 signature natively via Node `crypto`. Responds `202 Accepted` and delegates payload to Inngest.
-
-#### `GET /api/repos/:id/analytics`
-Fetches pre-aggregated metrics.
-- **Rate Limit:** 100 req/min per IP.
-- **Response:**
-```json
-{
-  "totalCommits7d": 142,
-  "openPrs": 12,
-  "closedPrs": 89
-}
+    I->>W: Trigger Job (concurrency: 10)
+    W->>G: getCommitsStream() (Iterative)
+    loop Every 100 items
+        G-->>W: Page N
+        W->>D: Batch Insert (ON CONFLICT DO NOTHING)
+        W->>D: Update commitsCursor
+    end
+    
+    W->>D: Fetch normalized raw events
+    W->>E: computeHealth(), computeResilience()
+    E-->>W: { score: 85, version: "v0.1", evidence: [...] }
+    W->>D: Write Snapshots & Update Repo
+    W->>U: Webhook / UI Polling updates to "Synced"
 ```
 
 ---
 
-## 10. Dashboard
+## 🌊 Data Flow (CQRS-lite)
+
+We do not overwrite historical data. We project it.
 
 ```mermaid
-graph TD
-    A[Dashboard Layout] --> B[Sidebar Navigation]
-    A --> C[Header with Command Palette]
-    A --> D[Main Content Area]
-    D --> E[4-Card Metric Grid]
-    D --> F[Velocity Chart]
-    D --> G[Recent Activity List]
-```
-
-The UI is built with Tailwind CSS, strictly adhering to mobile-first responsive design. The command palette (Ctrl+K) provides global navigation.
-
----
-
-## 11. Design System
-
-- **Typography:** Inter (Sans), JetBrains Mono (Code).
-- **Spacing:** Tailwind default 4px scale.
-- **Tokens:** Centralized in `tailwind.config.ts`.
-- **Accessibility:** WCAG 2.1 AA compliant contrast ratios. Radix UI primitives for complex components (dialogs, dropdowns).
-
----
-
-## 12. AI Architecture
-
-```mermaid
-graph TD
-    A[User Request] --> B[Domain Analytics]
-    B --> C[Fetch Raw Commits/PRs]
-    C --> D["@forgelens/ai Package"]
-    D --> E[Prompt Construction]
-    E --> F["OpenAI gpt-4o"]
-    F --> G[Markdown Stream]
-```
-
-AI is strictly utilized for **Semantic Code Review**. We do not use AI for deterministic math. The pipeline fetches the last 14 days of commit messages, constructs a highly specific context window, and requests an analysis of architectural themes and technical debt.
-
----
-
-## 13. GitHub Integration
-
-We integrate via GitHub Apps and OAuth.
-- **Authentication:** Managed via Clerk OAuth providers.
-- **Rate Limits:** Octokit is configured with exponential backoff retries within the durable Inngest worker.
-- **Reconciliation:** A nightly cron (`0 0 * * *`) scans active repositories, verifies `last_synced_at`, and triggers delta syncs to heal dropped webhooks.
-
----
-
-## 14. Security
-
-- **Encryption:** OAuth tokens encrypted via AES-256-GCM in the DB layer.
-- **Authentication:** Clerk manages JWTs and session lifecycle.
-- **Webhooks:** Validated via HMAC signatures. Replay attacks mitigated by validating `x-github-delivery` headers against a Redis cache.
-- **Tenant Isolation:** Drizzle queries strictly enforce `where(eq(repositories.userId, currentUserId))`.
-- **Compliance:** Architecture is designed for SOC2 Type I readiness (encryption at rest, audit logs via Inngest step histories).
-
----
-
-## 15. Performance
-
-- **Target:** Dashboard TTI < 100ms.
-- **Bottlenecks Mitigated:**
-  - Vercel 30s timeouts resolved via Inngest queues.
-  - Postgres analytical queries resolved via Materialized Views and composite indexing.
-  - LLM latency masked via React Server Components streaming (`Suspense`).
-
----
-
-## 16. Folder Structure
-
-```text
-forgelens/
-├── apps/
-│   └── web/                 # Next.js Application
-│       ├── src/app/         # App Router (Pages, API)
-│       ├── src/actions/     # Server Actions
-│       └── src/inngest/     # Durable Worker Functions
-├── packages/
-│   ├── ai/                  # AI Wrapper (Vercel AI SDK)
-│   ├── db/                  # Drizzle ORM, Schemas, Encryption
-│   ├── domain-analytics/    # Pure TypeScript Business Logic
-│   └── github/              # Octokit Provider Abstraction
-├── pnpm-workspace.yaml
-└── turbo.json
-```
-
-**Dependency Rule:** `packages/domain-*` cannot import from `apps/*`. Infrastructure packages (`db`, `github`) cannot depend on each other.
-
----
-
-## 17. Development Workflow
-
-- **Branching:** Trunk-based development.
-- **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`).
-- **CI:** GitHub Actions runs `turbo build`, `eslint`, and `vitest`.
-- **Preview:** Vercel automatically deploys branch previews for every PR.
-
----
-
-## 18. Deployment
-
-```mermaid
-graph TD
-    A[Developer Push] --> B[GitHub Actions]
-    B --> C[Vercel Production]
-    B --> D[Neon Postgres Schema Update]
-    C --> E[Inngest Cloud Sync]
+graph LR
+    subgraph Write Model
+    A[Raw GitHub Commits] --> B[Insert DB]
+    C[Raw GitHub PRs] --> B
+    end
+    
+    subgraph Read Model
+    B --> D[Analytics Compiler]
+    D --> E[Health Projections v1]
+    D --> F[Resilience Projections v1]
+    end
+    
+    E --> G[Dashboard UI]
+    F --> G
 ```
 
 ---
 
-## 19. Monitoring
+## 🚀 Sync Engine
 
-- **Logging:** Structured JSON logs sent to Axiom.
-- **Tracing:** Next.js OpenTelemetry instrumentation.
-- **Error Tracking:** Sentry captures unhandled exceptions in API routes and Inngest workers.
-- **SLOs:** 99.9% uptime for dashboard reads. 99.9% webhook ingestion success (post-reconciliation).
+The ingestion pipeline is designed for **Operation Iron** (extreme survival).
+
+### Streaming & Pagination
+Instead of loading a repository into an array (which instantly OOMs on 1M+ commit repos), we use `async function* getCommitsStream`. Memory remains flat at ~120MB regardless of repository size.
+
+### Rate Limiting & Backoff
+We use `@octokit/plugin-throttling`. If GitHub returns a `429 Too Many Requests`, the worker pauses execution exponentially. It does not crash.
+
+### Checkpoints & Recovery
+Every batch insert updates a `cursor` in the database. If a worker receives a `SIGTERM` or Redis drops, the next worker resumes exactly from that cursor. 
+
+### Back-Pressure
+Inngest concurrency is strictly limited to 10 parallel synchronizations. We throttle ingestion to protect PostgreSQL connection pools from exhaustion.
 
 ---
 
-## 20. Testing
+## 🧠 Analytics Engine
 
-- **Unit:** Vitest for pure functions in `packages/domain-analytics`.
-- **Integration:** Testcontainers for Postgres DB schema tests.
-- **E2E:** Playwright for critical user journeys (OAuth login -> Repo Sync).
+Located purely in `packages/domain-analytics`. It contains zero database or UI code.
+
+### 1. Health Engine (v0.1)
+- **Velocity (30%):** PRs merged per week, commit frequency.
+- **Activity (30%):** Total active contributors over 90 days.
+- **Responsiveness (20%):** Average time to close PRs/Issues.
+- **Maintenance (20%):** Ratio of commits to merged PRs.
+
+### 2. Resilience Engine (v0.1)
+- **Bus Factor (35%):** How many people author 50% of the commits. A Bus Factor of 1 immediately tanks the score.
+- **Knowledge Distribution (25%):** Ratio of core maintainers to drive-by contributors.
+- **Review Coverage (20%):** Enforced peer review patterns.
+- **Contributor Freshness (20%):** If the top 5 committers haven't been seen in 90 days, the repository is effectively abandoned.
+
+### Explainability
+The engine returns `evidence` strings. Example: `⚠ Critical Risk: Single point of failure (Bus Factor 1).` The UI renders this directly.
 
 ---
 
-## 21. Roadmap
+## 🤖 AI Architecture (Disabled in Core)
 
-```mermaid
-gantt
-    title ForgeLens Development Roadmap
-    dateFormat  YYYY-MM-DD
-    section Phase 1: MVP
-    Turborepo Setup           :done,    p1, 2026-06-01, 3d
-    Auth & DB Schemas         :done,    p2, 2026-06-04, 5d
-    Webhook & Inngest Queue   :done,    p3, 2026-06-09, 7d
-    Semantic AI Insights      :done,    p4, 2026-06-16, 10d
-    section Phase 2: Enterprise
-    RBAC & Team Workspaces    :active,  p5, 2026-06-26, 14d
-    SSO / SAML Integration    :         p6, 2026-07-10, 14d
+*Note: AI features are part of ForgeLens Labs and strictly excluded from the deterministic Analytics Engine.*
+
+**Future Implementation (TCGE):**
+- **Temporal Code Graph:** Parses code into AST trees and tracks variable changes over Git histories.
+- **Vector Search:** Embeds code changes via OpenAI/Gemini embeddings.
+- **LLM Gateway:** Retrieves historical context to answer natural language architecture questions.
+
+---
+
+## 🗄️ Database
+
+**ORM:** Drizzle. **Driver:** PostgreSQL (pg).
+
+### Core Schemas
+- `repositories`: Tracks metadata, sync status, and pagination cursors.
+- `commits` / `pull_requests`: Raw append-only event logs. Indexed heavily on `repositoryId`.
+- `contributors`: Computed profiles (Name, Role, Last Active).
+- `repository_snapshots`: Time-series tracking of Health and Resilience scores for charting.
+
+### Indexing Strategy
+All foreign keys (e.g., `repositoryId`) feature explicit B-Tree indexes (`index("repo_idx").on(table.repositoryId)`).
+
+---
+
+## 🔒 Security
+
+We adhere to the OWASP Top 10 and enterprise security architectures.
+
+- **Authentication:** Managed by Clerk (OIDC/SAML ready).
+- **Environment Variables:** Strictly validated at boot via Zod (`@t3-oss/env-nextjs`). Crash early if secrets are missing.
+- **Database Connections:** SSL enforced.
+- **Input Validation:** All imports run against strict regex bounds to prevent SSRF and Path Traversal.
+- **Audit Logging:** Every sync, failure, and throttle event is logged.
+
+---
+
+## ⚡ Performance
+
+ForgeLens enforces a strict **Performance Budget**:
+- Memory: `< 500 MB`
+- UI Paint: `< 1s`
+- DB Insertion: `> 500 rows/s`
+- Analytics Compile: `< 300 ms`
+
+Violations fail the CI pipeline.
+
+---
+
+## 🧪 Testing
+
+1. **Unit Testing:** `packages/domain-analytics` is 100% unit tested using Vitest. Mathematical edge cases (Bus Factor 1, 0 commits, negative time bounds) are explicitly verified.
+2. **E2E Testing:** Handled via Playwright to ensure the core import loop is unbreakable.
+3. **Chaos Engineering:** Tested against API 500s, DB disconnects, and SIGTERMs during benchmarks.
+
+---
+
+## 🏗️ DevOps
+
+- **CI/CD:** GitHub Actions test the Turborepo graph.
+- **Tracing:** OpenTelemetry (`@opentelemetry/api`) spans wrap every phase of the Inngest worker.
+- **Metrics:** Exposed via standard Prometheus scrape endpoints.
+
+---
+
+## 📦 Project Structure
+
+| Package/App | Type | Responsibility |
+| :--- | :--- | :--- |
+| `apps/web` | Next.js App | UI, Routing, API, Server Actions, Inngest workers |
+| `packages/db` | Library | Drizzle Schemas, Migrations, DB Client |
+| `packages/domain-analytics` | Library | Pure math, deterministic compilers, unit tests |
+| `packages/github` | Library | Octokit client, streaming generators, rate limits |
+| `packages/ui` | Library | Tailwind configuration, Shared React components |
+| `packages/config` | Library | Global TS, ESLint rules |
+
+---
+
+## 🛠️ Technology Stack
+
+| Technology | Reason | Alternative Considered |
+| :--- | :--- | :--- |
+| **Next.js 14 (App Router)** | RSCs reduce client bundle size; seamless Server Actions for DB writes. | Remix (Lacks ecosystem momentum for UI libs) |
+| **PostgreSQL** | Relational integrity is mandatory for analytics. | MongoDB (Terrible for complex JOINs and aggregations) |
+| **Drizzle ORM** | SQL-like syntax, edge-compatible, high performance. | Prisma (Rust engine overhead, slow cold starts) |
+| **Inngest** | Event-driven, auto-retries, serverless-friendly queues. | Redis BullMQ (Requires maintaining heavy worker infra) |
+| **Turborepo** | Blazing fast monorepo builds with remote caching. | Nx (Overly complex for our package scale) |
+| **Clerk** | Drop-in enterprise auth (SAML/SSO ready). | NextAuth (Requires manual DB adapter maintenance) |
+
+---
+
+## 📐 Engineering Decisions
+
+Our decisions are documented in `docs/adr/`. 
+- **ADR-001 (Monorepo):** To prevent version drift between analytics and the UI.
+- **ADR-002 (Inngest):** Chosen to handle long-running GitHub streams without Vercel 10-second timeout limits.
+- **ADR-003 (CQRS-lite):** To allow Analytics algorithms to upgrade (v1 -> v2) without destructive database migrations.
+
+---
+
+## 🔌 API
+
+*(Internal Server Actions)*
+
+```typescript
+// Import a repository
+const result = await importRepository("torvalds/linux");
+// Dispatches Inngest event: { name: "repository/sync", data: { repositoryId: "..." } }
 ```
 
----
-
-## 22. Business Model
-
-- **Free Tier:** 1 public repository, 30 days retention.
-- **Pro ($20/mo):** Unlimited private repositories, 1 year retention, semantic AI insights.
-- **Enterprise ($499/mo):** SAML SSO, on-premise runner support, raw data export, audit logs.
+Errors are mapped to strict UI states using React Error Boundaries.
 
 ---
 
-## 23. Contributing
+## 🐙 GitHub Integration
 
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feat/add-alerts`).
-3. Ensure tests pass (`pnpm test`).
-4. Submit a PR targeting `main`.
-
----
-
-## 24. FAQ
-
-**Q: Why not microservices?**
-A: A modular monolith provides the internal boundaries of microservices without the DevOps overhead of maintaining Kubernetes, gRPC, and distributed tracing during the MVP phase.
-
-**Q: Is my code sent to OpenAI?**
-A: Only commit messages, PR titles, and author names are sent to the LLM. Source code is never read or transmitted.
+We use Octokit REST (not GraphQL, to avoid complex node cursor limits on massive repos). 
+- Implements `@octokit/plugin-throttling` for exponential backoff on 429 and Secondary Rate Limits.
+- Uses `async function*` generators to yield HTTP pages individually, preventing memory bloat.
 
 ---
 
-## 25. Glossary
+## 📊 Benchmarks
 
-- **Durable Execution:** A system that guarantees code runs to completion by maintaining state across retries (Inngest).
-- **CQRS-lite:** Separating rapid database writes (webhooks) from optimized analytical reads (Materialized Views).
-- **Semantic Code Review:** AI analysis of architectural intent rather than line-by-line syntax validation.
+**Operation Iron** executes against:
+1. `octocat/Hello-World` (Smoke)
+2. `vercel/next.js` (Real Project)
+3. `microsoft/vscode` (Large)
+4. `kubernetes/kubernetes` (Very Large)
+5. `torvalds/linux` (Torture Test)
 
----
-
-## 26. References
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Inngest Documentation](https://www.inngest.com/docs)
-- [Drizzle ORM](https://orm.drizzle.team/)
-- [Vercel AI SDK](https://sdk.vercel.ai/docs)
-- [GitHub Webhooks](https://docs.github.com/en/webhooks)
+Results are permanently tracked in `benchmark/history/` as JSON payloads to prove regression boundaries.
 
 ---
 
-## 27. License
+## 📚 Documentation
 
-Copyright © 2026 VoidSwift. Licensed under the MIT License.
+- `docs/adr/`: Architecture Decision Records.
+- `docs/release/`: Feature Freeze gates, Beta Checklists, and Performance Budgets.
+- `docs/postmortems/`: PM-XXXX files for blameless incident analysis.
+- `docs/PRODUCT_TRUTH.md`: The only file that dictates roadmap—based strictly on beta usage facts.
+- `docs/labs/`: Future R&D (TCGE).
+
+---
+
+## 🔬 ForgeLens Labs
+
+Labs is our R&D division. It houses the **Temporal Code Graph Engine (TCGE)**.
+*Note: TCGE is strictly quarantined from ForgeLens Core. Core must function as a complete, valuable analytics product even if TCGE is never released.*
+
+---
+
+## 🗺️ Roadmap
+
+1. **Current:** Operation Iron (Hardening, Backpressure, Streaming).
+2. **Beta:** 10-20 User Observation Phase. Populate `PRODUCT_TRUTH.md`.
+3. **Production:** Open to public, implement SSO.
+4. **Future:** GitLab / BitBucket support.
+5. **Long-Term:** Merge TCGE for semantic code querying.
+
+---
+
+## ⚠️ Known Limitations
+
+*We do not hide weaknesses.*
+
+1. **GitHub Only:** We do not currently support GitLab or Bitbucket.
+2. **Public Repos Only:** The MVP does not request private repository OAuth scopes.
+3. **Algorithm Maturity:** Health and Resilience scores are at `v0.1` and will aggressively evolve based on beta user feedback.
+4. **Analytics Database Load:** The analytics engine currently runs queries directly against the primary DB. True CQRS streaming projections are scaffolding-only.
+
+---
+
+## 💬 FAQ
+
+**1. Does ForgeLens use AI to calculate the Health Score?**
+No. Health is mathematically deterministic. AI is strictly banned from generating metrics to ensure 100% explainability.
+
+**2. What happens if an import takes 3 hours?**
+The Inngest worker handles it via cursors and streaming. The UI will display a live "Importing..." timeline.
+
+**3. Will my server crash on `torvalds/linux`?**
+No. Operation Iron introduced streaming pagination. Peak RAM remains below 500MB regardless of repository size.
+
+*(Add 27 more based on Beta feedback...)*
+
+---
+
+## 🤝 Contributing
+
+1. **Development Setup:**
+   ```bash
+   pnpm install
+   pnpm run dev
+   ```
+2. **Architecture Rules:** No business logic in React components. No direct DB queries in UI files.
+3. **Testing Rules:** Every Domain Analytics change requires Vitest coverage.
+4. **Commit Rules:** We strictly follow Conventional Commits.
+5. **PR Rules:** Fill out the `.github/PULL_REQUEST_TEMPLATE.md`. No evidence = No merge.
+
+---
+
+## 📄 License
+
+MIT License.
+
+---
+
+## 🙏 Acknowledgements
+
+Designed with inspiration from modern enterprise observability principles (Google SRE, Stripe Infra, GitHub Platform).
+
+---
+
+## 🏁 Final Engineering Statement
+
+ForgeLens is not a dashboard. It is a disciplined, hardened, deterministic analytics engine. 
+
+It was built under a singular directive: **Reality Wins.** 
+
+Every feature is backed by evidence. Every metric is explainable. Every failure is documented. We do not merge code because it looks impressive; we merge code because it survives contact with reality. This repository serves as a blueprint for building software that is correct, observable, and impossible to surprise twice.
