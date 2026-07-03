@@ -14,21 +14,21 @@
 ForgeLens provides engineering leadership with deterministic visibility into codebase health and velocity, utilizing robust background reconciliation and selective semantic AI analysis.
 
 ```mermaid
-architecture-beta
-    group api(cloud)[Next.js API]
-    group workers(server)[Durable Workers]
-    group data(database)[Data Layer]
+graph LR
+    subgraph API [Next.js API]
+        Router[App Router]
+    end
+    subgraph Workers [Durable Workers]
+        Inngest[Inngest]
+    end
+    subgraph Data [Data Layer]
+        PG[(PostgreSQL)]
+    end
     
-    service ui(internet)[Dashboard]
-    service router(server)[App Router]
-    service inngest(server)[Inngest]
-    service pg(database)[PostgreSQL]
-    service llm(cloud)[OpenAI]
-    
-    ui:R --> L:router
-    router:B --> T:inngest
-    inngest:R --> L:pg
-    inngest:T --> B:llm
+    UI((Dashboard)) --> Router
+    Router --> Inngest
+    Inngest --> PG
+    Inngest --> LLM[OpenAI]
 ```
 
 ---
@@ -326,9 +326,9 @@ The UI is built with Tailwind CSS, strictly adhering to mobile-first responsive 
 graph TD
     A[User Request] --> B[Domain Analytics]
     B --> C[Fetch Raw Commits/PRs]
-    C --> D[@forgelens/ai Package]
+    C --> D["@forgelens/ai Package"]
     D --> E[Prompt Construction]
-    E --> F[OpenAI gpt-4o]
+    E --> F["OpenAI gpt-4o"]
     F --> G[Markdown Stream]
 ```
 
