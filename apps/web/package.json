@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.12",
+    "@forgelens/db": "workspace:^",
+    "drizzle-orm": "^0.45.2",
     "next": "16.2.10",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "svix": "^1.96.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
