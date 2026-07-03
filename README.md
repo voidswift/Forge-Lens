@@ -1,5 +1,4 @@
 <div align="center">
-  <!-- TODO: add actual logo file at docs/assets/logo.png before publishing; image will 404 until then -->
   <img src="docs/assets/logo.png" alt="ForgeLens Logo" width="200"/>
   <h1>ForgeLens</h1>
   <p><strong>Deterministic Engineering Intelligence.</strong></p>
