@@ -82,13 +82,14 @@ export const syncRepository = inngest.createFunction(
         }))
       };
       
-      const { calculateHealthScore, computeContributors, computeBusFactor } = await import("@forgelens/domain-analytics");
+      const { calculateHealthScore, computeContributors, computeBusFactor, calculateResilienceScore } = await import("@forgelens/domain-analytics");
       
       const profiles = computeContributors(data);
       const busFactor = computeBusFactor(profiles);
       const health = calculateHealthScore(data);
+      const resilience = calculateResilienceScore(data, profiles, busFactor);
       
-      return { health, profiles, busFactor };
+      return { health, profiles, busFactor, resilience };
     });
 
     await step.run("save-contributors", async () => {
@@ -111,16 +112,31 @@ export const syncRepository = inngest.createFunction(
 
     // Status: Completed
     await step.run("status-completed", async () => {
+      const { repositorySnapshots } = await import("@forgelens/db");
+      const now = new Date();
+
       await db.update(repositories)
         .set({ 
           syncStatus: "Completed", 
-          lastSyncedAt: new Date(),
+          lastSyncedAt: now,
           healthScore: healthResult.health.overallScore,
           healthAlgorithmVersion: healthResult.health.version,
           healthEvidence: healthResult.health.subScores,
-          busFactor: healthResult.busFactor
+          busFactor: healthResult.busFactor,
+          resilienceScore: healthResult.resilience.overallScore,
+          resilienceAlgorithmVersion: healthResult.resilience.version,
+          resilienceEvidence: healthResult.resilience.subScores
         })
         .where(eq(repositories.id, repositoryId));
+
+      await db.insert(repositorySnapshots).values({
+        id: `${repositoryId}-${now.getTime()}`,
+        repositoryId,
+        timestamp: now,
+        healthScore: healthResult.health.overallScore,
+        resilienceScore: healthResult.resilience.overallScore,
+        busFactor: healthResult.busFactor,
+      });
     });
 
     return { message: `Completed sync for ${fullName}` };

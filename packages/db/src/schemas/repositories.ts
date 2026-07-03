@@ -19,6 +19,9 @@ export const repositories = pgTable("repositories", {
   healthScore: integer("health_score"),
   healthAlgorithmVersion: text("health_algorithm_version"),
   healthEvidence: json("health_evidence"),
+  resilienceScore: integer("resilience_score"),
+  resilienceAlgorithmVersion: text("resilience_algorithm_version"),
+  resilienceEvidence: json("resilience_evidence"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
