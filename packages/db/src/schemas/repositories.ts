@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core"
 
 export const repositories = pgTable("repositories", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   githubId: integer("github_id").notNull().unique(),
   name: text("name").notNull(),
   fullName: text("full_name").notNull(),
