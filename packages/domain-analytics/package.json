@@ -1,0 +1,13 @@
+{
+  "name": "@forgelens/domain-analytics",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@forgelens/db": "workspace:*",
+    "drizzle-orm": "^0.30.10"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}

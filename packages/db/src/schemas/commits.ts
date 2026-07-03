@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, index } from "drizzle-orm/pg-core";
 import { repositories } from "./repositories";
 
 export const commits = pgTable("commits", {
@@ -10,4 +10,8 @@ export const commits = pgTable("commits", {
   url: text("url").notNull(),
   timestamp: timestamp("timestamp").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    repoTimeIdx: index("repo_time_idx").on(table.repositoryId, table.timestamp),
+  };
 });
