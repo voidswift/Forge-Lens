@@ -11,17 +11,59 @@ export const syncRepository = inngest.createFunction(
   { event: "repository/sync" },
   async ({ event, step }) => {
     const { repositoryId, fullName, githubToken } = event.data;
+    const owner = fullName.split("/")[0];
+    const repo = fullName.split("/")[1];
 
     const octokit = new GitHubClient(githubToken);
     
-    await step.run("fetch-commits", async () => {
-      console.log(`[Durable Execution] Syncing commits for ${fullName}`);
-      return []; 
+    // Status: Fetching Commits
+    await step.run("status-fetching-commits", async () => {
+      await db.update(repositories).set({ syncStatus: "Fetching Commits" }).where(eq(repositories.id, repositoryId));
     });
 
-    await step.run("update-sync-status", async () => {
+    const commitData = await step.run("fetch-commits", async () => {
+      return await octokit.getCommits(owner, repo);
+    });
+
+    await step.run("normalize-commits", async () => {
+      if (commitData.length === 0) return;
+      const values = commitData.map(c => ({
+        sha: c.sha,
+        repositoryId,
+        message: c.commit.message,
+        authorName: c.commit.author?.name || "Unknown",
+        timestamp: new Date(c.commit.author?.date || new Date())
+      }));
+      await db.insert(commits).values(values).onConflictDoNothing();
+    });
+
+    // Status: Fetching PRs
+    await step.run("status-fetching-prs", async () => {
+      await db.update(repositories).set({ syncStatus: "Fetching PRs" }).where(eq(repositories.id, repositoryId));
+    });
+
+    const prData = await step.run("fetch-prs", async () => {
+      return await octokit.getPullRequests(owner, repo);
+    });
+
+    await step.run("normalize-prs", async () => {
+      if (prData.length === 0) return;
+      const values = prData.map(pr => ({
+        id: pr.id,
+        repositoryId,
+        title: pr.title,
+        state: pr.state,
+        authorName: pr.user?.login || "Unknown",
+        createdAt: new Date(pr.created_at),
+        updatedAt: new Date(pr.updated_at || pr.created_at)
+      }));
+      await db.insert(pullRequests).values(values).onConflictDoNothing();
+    });
+
+    // Status: Completed
+    await step.run("status-completed", async () => {
       await db.update(repositories)
-        .set({ lastSyncedAt: new Date() })
+        .set({ syncStatus: "Completed", lastSyncedAt: new Date() })
         .where(eq(repositories.id, repositoryId));
     });
 

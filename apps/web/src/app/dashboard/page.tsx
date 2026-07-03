@@ -1,4 +1,4 @@
-import { syncRepositories } from "@/actions/sync";
+import { ImportRepositoryForm } from "./import-form";
 import { getDashboardAnalytics } from "@/actions/analytics";
 import { db, repositories } from "@forgelens/db";
 import { auth } from "@clerk/nextjs/server";
@@ -46,14 +46,10 @@ export default async function DashboardPage() {
 
       {/* Repositories Section */}
       <section>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
           <h2 className="text-xl font-semibold text-gray-900">Your Repositories</h2>
           
-          <form action={syncRepositories}>
-            <button type="submit" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
-              Sync GitHub Repositories
-            </button>
-          </form>
+          <ImportRepositoryForm />
         </div>
 
         {repos.length === 0 ? (
