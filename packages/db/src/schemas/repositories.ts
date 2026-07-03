@@ -22,6 +22,9 @@ export const repositories = pgTable("repositories", {
   resilienceScore: integer("resilience_score"),
   resilienceAlgorithmVersion: text("resilience_algorithm_version"),
   resilienceEvidence: json("resilience_evidence"),
+  commitsCursor: text("commits_cursor"),
+  prsCursor: text("prs_cursor"),
+  isSyncing: boolean("is_syncing").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

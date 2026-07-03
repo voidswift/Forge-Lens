@@ -9,10 +9,11 @@ export const pullRequests = pgTable("pull_requests", {
   state: text("state").notNull(), // 'open', 'closed'
   url: text("url").notNull(),
   authorName: text("author_name").notNull(),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => {
   return {
+    repoIdx: index("prs_repo_idx").on(table.repositoryId),
     repoStateIdx: index("repo_state_idx").on(table.repositoryId, table.state),
     repoUpdatedIdx: index("repo_updated_idx").on(table.repositoryId, table.updatedAt),
   };

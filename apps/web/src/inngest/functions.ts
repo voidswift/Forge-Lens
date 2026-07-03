@@ -14,27 +14,33 @@ export const syncRepository = inngest.createFunction(
     const owner = fullName.split("/")[0];
     const repo = fullName.split("/")[1];
 
-    const octokit = new GitHubClient(githubToken);
+    const client = new GitHubClient(githubToken);
     
     // Status: Fetching Commits
     await step.run("status-fetching-commits", async () => {
       await db.update(repositories).set({ syncStatus: "Fetching Commits" }).where(eq(repositories.id, repositoryId));
     });
 
-    const commitData = await step.run("fetch-commits", async () => {
-      return await octokit.getCommits(owner, repo);
-    });
-
-    await step.run("normalize-commits", async () => {
-      if (commitData.length === 0) return;
-      const values = commitData.map(c => ({
-        sha: c.sha,
-        repositoryId,
-        message: c.commit.message,
-        authorName: c.commit.author?.name || "Unknown",
-        timestamp: new Date(c.commit.author?.date || new Date())
-      }));
-      await db.insert(commits).values(values).onConflictDoNothing();
+    // Stream Commits
+    await step.run("fetch-and-store-commits", async () => {
+      let count = 0;
+      for await (const page of client.getCommitsStream(owner, repo)) {
+        if (page.length === 0) continue;
+        
+        const values = page.map((c: any) => ({
+          id: c.sha,
+          repositoryId,
+          message: c.commit.message,
+          authorName: c.commit.author?.name || "Unknown",
+          url: c.html_url,
+          timestamp: new Date(c.commit.author?.date || new Date()),
+        }));
+        await db.insert(commits).values(values).onConflictDoNothing();
+        
+        count += page.length;
+        // Optionally update cursor in db if we needed checkpointing mid-stream
+      }
+      return count;
     });
 
     // Status: Fetching PRs
@@ -42,22 +48,27 @@ export const syncRepository = inngest.createFunction(
       await db.update(repositories).set({ syncStatus: "Fetching PRs" }).where(eq(repositories.id, repositoryId));
     });
 
-    const prData = await step.run("fetch-prs", async () => {
-      return await octokit.getPullRequests(owner, repo);
-    });
+    // Stream Pull Requests
+    await step.run("fetch-and-store-prs", async () => {
+      let count = 0;
+      for await (const page of client.getPullRequestsStream(owner, repo)) {
+        if (page.length === 0) continue;
 
-    await step.run("normalize-prs", async () => {
-      if (prData.length === 0) return;
-      const values = prData.map(pr => ({
-        id: pr.id,
-        repositoryId,
-        title: pr.title,
-        state: pr.state,
-        authorName: pr.user?.login || "Unknown",
-        createdAt: new Date(pr.created_at),
-        updatedAt: new Date(pr.updated_at || pr.created_at)
-      }));
-      await db.insert(pullRequests).values(values).onConflictDoNothing();
+        const values = page.map((pr: any) => ({
+          id: pr.id.toString(),
+          repositoryId,
+          number: pr.number,
+          title: pr.title,
+          state: pr.state,
+          url: pr.html_url,
+          authorName: pr.user?.login || "Unknown",
+          createdAt: new Date(pr.created_at),
+          updatedAt: new Date(pr.updated_at || pr.created_at),
+        }));
+        await db.insert(pullRequests).values(values).onConflictDoNothing();
+        count += page.length;
+      }
+      return count;
     });
 
     // Status: Calculating Health
@@ -65,19 +76,26 @@ export const syncRepository = inngest.createFunction(
       await db.update(repositories).set({ syncStatus: "Calculating Health" }).where(eq(repositories.id, repositoryId));
     });
 
+    // Analytics computation step
+    // (Note: For large repos, loading all from DB could still be heavy. 
+    // True CQRS projections should be done via SQL aggregates, but for now we query DB instead of memory)
     const healthResult = await step.run("calculate-health", async () => {
+      // In a real V8 safe environment, this would be a chunked SQL stream.
+      const commitData = await db.query.commits.findMany({ where: eq(commits.repositoryId, repositoryId) });
+      const prData = await db.query.pullRequests.findMany({ where: eq(pullRequests.repositoryId, repositoryId) });
+      
       const data = {
         commits: commitData.map(c => ({
-          sha: c.sha,
-          timestamp: new Date(c.commit.author?.date || new Date()),
-          authorName: c.commit.author?.name || "Unknown"
+          sha: c.id,
+          timestamp: c.timestamp,
+          authorName: c.authorName
         })),
         pullRequests: prData.map(pr => ({
-          id: pr.id,
-          createdAt: new Date(pr.created_at),
-          updatedAt: new Date(pr.updated_at || pr.created_at),
+          id: parseInt(pr.id),
+          createdAt: pr.createdAt,
+          updatedAt: pr.updatedAt,
           state: pr.state,
-          authorName: pr.user?.login || "Unknown",
+          authorName: pr.authorName,
           title: pr.title
         }))
       };

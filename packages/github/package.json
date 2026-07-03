@@ -4,6 +4,7 @@
   "private": true,
   "main": "src/index.ts",
   "dependencies": {
+    "@octokit/plugin-throttling": "^11.0.3",
     "octokit": "^4.0.0"
   },
   "devDependencies": {
