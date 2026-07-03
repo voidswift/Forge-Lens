@@ -1,12 +1,11 @@
 import { inngest } from "./client";
 import { GitHubClient } from "@forgelens/github";
-import { db, commits, pullRequests, repositories } from "@forgelens/db";
+import { db, commits, pullRequests, repositories, users } from "@forgelens/db";
 import { eq } from "drizzle-orm";
 
 export const syncRepository = inngest.createFunction(
   { 
     id: "sync-repository",
-    // Configure retries for resilience against GitHub API rate limits
     retries: 3 
   },
   { event: "repository/sync" },
@@ -15,10 +14,7 @@ export const syncRepository = inngest.createFunction(
 
     const octokit = new GitHubClient(githubToken);
     
-    // Inngest steps provide stateful resume capability if the worker crashes
-    const commitData = await step.run("fetch-commits", async () => {
-      // In production, this pages through the Octokit API.
-      // Because this is a durable worker, it doesn't matter if it takes 10 minutes.
+    await step.run("fetch-commits", async () => {
       console.log(`[Durable Execution] Syncing commits for ${fullName}`);
       return []; 
     });
@@ -30,5 +26,51 @@ export const syncRepository = inngest.createFunction(
     });
 
     return { message: `Completed sync for ${fullName}` };
+  }
+);
+
+// Nightly Reconciliation Cron to heal webhook data drift
+export const reconcileRepositoriesCron = inngest.createFunction(
+  { id: "reconcile-repositories-cron" },
+  { cron: "0 0 * * *" }, // Runs every night at midnight UTC
+  async ({ step }) => {
+    
+    const repos = await step.run("fetch-active-repositories", async () => {
+      return await db
+        .select({
+          id: repositories.id,
+          fullName: repositories.fullName,
+          userId: repositories.userId
+        })
+        .from(repositories);
+    });
+
+    const usersWithTokens = await step.run("fetch-user-tokens", async () => {
+      return await db
+        .select({ 
+          id: users.id, 
+          githubToken: users.githubToken 
+        })
+        .from(users);
+    });
+
+    const tokenMap = new Map(usersWithTokens.map(u => [u.id, u.githubToken]));
+
+    const eventsToDispatch = repos
+      .filter(repo => tokenMap.has(repo.userId) && tokenMap.get(repo.userId))
+      .map(repo => ({
+        name: "repository/sync",
+        data: {
+          repositoryId: repo.id,
+          fullName: repo.fullName,
+          githubToken: tokenMap.get(repo.userId)
+        }
+      }));
+
+    if (eventsToDispatch.length > 0) {
+      await step.sendEvent("dispatch-syncs", eventsToDispatch);
+    }
+
+    return { message: `Dispatched ${eventsToDispatch.length} reconciliation jobs.` };
   }
 );

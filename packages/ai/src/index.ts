@@ -14,15 +14,19 @@ export interface PRData {
 }
 
 export class AnalyticsAI {
-  async generateEngineeringInsights(commits: CommitData[], prs: PRData[]) {
+  async generateSemanticReview(commits: CommitData[], prs: PRData[]) {
     const commitContext = commits.map(c => `- ${c.authorName}: ${c.message}`).join("\n");
     const prContext = prs.map(pr => `- ${pr.authorName} [${pr.state}]: ${pr.title}`).join("\n");
 
     const prompt = `
-      You are a Staff Engineer analyzing recent engineering activity.
-      Analyze the following commits and pull requests.
-      Identify bottlenecks, summarize what the team focused on, and suggest areas of improvement.
-      Return the result in clear, well-formatted Markdown.
+      You are an elite Staff Engineer reviewing a team's recent activity.
+      DO NOT summarize basic statistics (e.g., "The team merged 5 PRs"). Those are handled by our deterministic analytics engine.
+      Instead, perform a Semantic Code Review:
+      - What architectural themes were touched this week?
+      - Are there signs of technical debt being added or removed based on the PR titles?
+      - What product features were the primary focus?
+      
+      Return a brief, highly professional Markdown report.
 
       Commits:
       ${commitContext || "No recent commits."}
@@ -40,7 +44,7 @@ export class AnalyticsAI {
       return text;
     } catch (error) {
       console.error("AI Generation Error:", error);
-      throw new Error("Failed to generate insights.");
+      throw new Error("Failed to generate semantic insights.");
     }
   }
 }

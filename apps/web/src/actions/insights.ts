@@ -48,7 +48,7 @@ export async function generateAiInsights() {
 
   const ai = new AnalyticsAI();
   
-  const insights = await ai.generateEngineeringInsights(
+  const insights = await ai.generateSemanticReview(
     rawCommits.map(c => ({
       message: c.message,
       authorName: c.authorName,
