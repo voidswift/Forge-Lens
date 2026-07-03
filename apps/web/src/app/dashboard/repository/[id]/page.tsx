@@ -67,11 +67,20 @@ export default async function RepositoryPage({
           {repo.description && <p className="mt-4 text-gray-700">{repo.description}</p>}
         </div>
         
-        {/* Health Score Placeholder */}
-        <div className="shrink-0 bg-gray-50 border border-gray-200 rounded-lg p-4 w-48 text-center">
+        {/* Health Score */}
+        <div className="shrink-0 bg-gray-50 border border-gray-200 rounded-lg p-4 w-48 text-center flex flex-col justify-center">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Repository Health</p>
-          <div className="text-2xl font-black text-gray-400">UNKNOWN</div>
-          <p className="text-xs text-gray-400 mt-1">Calculating...</p>
+          {repo.healthScore !== null ? (
+            <>
+              <div className="text-3xl font-black text-gray-900">{repo.healthScore}</div>
+              <p className="text-xs text-gray-500 mt-1">{repo.healthAlgorithmVersion}</p>
+            </>
+          ) : (
+            <>
+              <div className="text-2xl font-black text-gray-400">UNKNOWN</div>
+              <p className="text-xs text-gray-400 mt-1">Calculating...</p>
+            </>
+          )}
         </div>
       </div>
 
@@ -114,6 +123,34 @@ export default async function RepositoryPage({
           </div>
         </div>
       </div>
+
+      {/* Health Evidence Panel */}
+      {!isSyncing && repo.healthEvidence && (
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Why this score?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Object.entries(repo.healthEvidence as any).map(([key, result]: [string, any]) => (
+              <div key={key}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700 capitalize">{key}</span>
+                  <span className="text-sm font-bold text-gray-900">{result.score}/100</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                  <div className="bg-black h-2 rounded-full" style={{ width: `${result.score}%` }}></div>
+                </div>
+                <ul className="space-y-1">
+                  {result.evidence.map((line: string, i: number) => (
+                    <li key={i} className="text-xs text-gray-600 flex items-start gap-1">
+                      <span className="text-gray-400 mt-0.5">•</span>
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Unified Timeline */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">

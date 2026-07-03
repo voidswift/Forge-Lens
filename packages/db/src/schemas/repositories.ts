@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, json } from "drizzle-orm/pg-core";
 
 export const repositories = pgTable("repositories", {
   id: text("id").primaryKey(),
@@ -15,6 +15,9 @@ export const repositories = pgTable("repositories", {
   watchers: integer("watchers").default(0),
   license: text("license"),
   lastSyncedAt: timestamp("last_synced_at"),
+  healthScore: integer("health_score"),
+  healthAlgorithmVersion: text("health_algorithm_version"),
+  healthEvidence: json("health_evidence"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

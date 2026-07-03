@@ -2,12 +2,15 @@
   "name": "@forgelens/domain-analytics",
   "version": "0.1.0",
   "private": true,
-  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
   "dependencies": {
     "@forgelens/db": "workspace:*",
     "drizzle-orm": "^0.30.10"
   },
   "devDependencies": {
-    "typescript": "latest"
+    "typescript": "latest",
+    "vitest": "^4.1.9"
   }
 }

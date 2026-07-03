@@ -60,10 +60,42 @@ export const syncRepository = inngest.createFunction(
       await db.insert(pullRequests).values(values).onConflictDoNothing();
     });
 
+    // Status: Calculating Health
+    await step.run("status-calculating-health", async () => {
+      await db.update(repositories).set({ syncStatus: "Calculating Health" }).where(eq(repositories.id, repositoryId));
+    });
+
+    const healthResult = await step.run("calculate-health", async () => {
+      const data = {
+        commits: commitData.map(c => ({
+          sha: c.sha,
+          timestamp: new Date(c.commit.author?.date || new Date()),
+          authorName: c.commit.author?.name || "Unknown"
+        })),
+        pullRequests: prData.map(pr => ({
+          id: pr.id,
+          createdAt: new Date(pr.created_at),
+          updatedAt: new Date(pr.updated_at || pr.created_at),
+          state: pr.state,
+          authorName: pr.user?.login || "Unknown",
+          title: pr.title
+        }))
+      };
+      
+      const { calculateHealthScore } = await import("@forgelens/domain-analytics");
+      return calculateHealthScore(data);
+    });
+
     // Status: Completed
     await step.run("status-completed", async () => {
       await db.update(repositories)
-        .set({ syncStatus: "Completed", lastSyncedAt: new Date() })
+        .set({ 
+          syncStatus: "Completed", 
+          lastSyncedAt: new Date(),
+          healthScore: healthResult.overallScore,
+          healthAlgorithmVersion: healthResult.version,
+          healthEvidence: healthResult.subScores
+        })
         .where(eq(repositories.id, repositoryId));
     });
 
