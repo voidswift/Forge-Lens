@@ -4,6 +4,7 @@ import { db, repositories } from "@forgelens/db";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -59,20 +60,22 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {repos.map((repo) => (
-              <div key={repo.id} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900 truncate">{repo.name}</h3>
-                  <p className="text-gray-500 text-sm mt-1 truncate">{repo.fullName}</p>
+              <Link key={repo.id} href={`/dashboard/repository/${repo.id}`} className="block">
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-black transition-all h-full cursor-pointer">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900 truncate">{repo.name}</h3>
+                    <p className="text-gray-500 text-sm mt-1 truncate">{repo.fullName}</p>
+                  </div>
+                  <div className="mt-6 flex justify-between items-center text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${repo.isPrivate ? 'bg-gray-100 text-gray-700' : 'bg-blue-50 text-blue-700'}`}>
+                      {repo.isPrivate ? 'Private' : 'Public'}
+                    </span>
+                    <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">
+                      {repo.syncStatus}
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-6 flex justify-between items-center text-sm">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${repo.isPrivate ? 'bg-gray-100 text-gray-700' : 'bg-blue-50 text-blue-700'}`}>
-                    {repo.isPrivate ? 'Private' : 'Public'}
-                  </span>
-                  <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">
-                    {repo.syncStatus}
-                  </span>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

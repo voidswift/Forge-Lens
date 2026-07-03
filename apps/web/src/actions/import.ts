@@ -60,6 +60,12 @@ export async function importRepository(prevState: any, formData: FormData) {
       name: githubRepo.name,
       fullName: githubRepo.full_name,
       isPrivate: githubRepo.private,
+      description: githubRepo.description,
+      language: githubRepo.language,
+      stars: githubRepo.stargazers_count,
+      forks: githubRepo.forks_count,
+      watchers: githubRepo.watchers_count,
+      license: githubRepo.license?.name,
       syncStatus: "QUEUED",
     }).onConflictDoNothing();
 

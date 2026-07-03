@@ -8,6 +8,13 @@ export const repositories = pgTable("repositories", {
   fullName: text("full_name").notNull(),
   isPrivate: boolean("is_private").notNull(),
   syncStatus: text("sync_status").notNull().default("PENDING"), // PENDING, IMPORTING, LIVE
+  description: text("description"),
+  language: text("language"),
+  stars: integer("stars").default(0),
+  forks: integer("forks").default(0),
+  watchers: integer("watchers").default(0),
+  license: text("license"),
+  lastSyncedAt: timestamp("last_synced_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
