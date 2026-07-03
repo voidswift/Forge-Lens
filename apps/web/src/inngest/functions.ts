@@ -82,8 +82,31 @@ export const syncRepository = inngest.createFunction(
         }))
       };
       
-      const { calculateHealthScore } = await import("@forgelens/domain-analytics");
-      return calculateHealthScore(data);
+      const { calculateHealthScore, computeContributors, computeBusFactor } = await import("@forgelens/domain-analytics");
+      
+      const profiles = computeContributors(data);
+      const busFactor = computeBusFactor(profiles);
+      const health = calculateHealthScore(data);
+      
+      return { health, profiles, busFactor };
+    });
+
+    await step.run("save-contributors", async () => {
+      const { contributors } = await import("@forgelens/db");
+      if (healthResult.profiles.length > 0) {
+        const values = healthResult.profiles.map(p => ({
+          id: `${repositoryId}-${p.name}`,
+          repositoryId,
+          name: p.name,
+          role: p.role,
+          score: p.score,
+          trend: p.trend,
+          expertise: p.expertise,
+          lastActive: p.lastActive,
+          algorithmVersion: healthResult.health.version,
+        }));
+        await db.insert(contributors).values(values).onConflictDoNothing();
+      }
     });
 
     // Status: Completed
@@ -92,9 +115,10 @@ export const syncRepository = inngest.createFunction(
         .set({ 
           syncStatus: "Completed", 
           lastSyncedAt: new Date(),
-          healthScore: healthResult.overallScore,
-          healthAlgorithmVersion: healthResult.version,
-          healthEvidence: healthResult.subScores
+          healthScore: healthResult.health.overallScore,
+          healthAlgorithmVersion: healthResult.health.version,
+          healthEvidence: healthResult.health.subScores,
+          busFactor: healthResult.busFactor
         })
         .where(eq(repositories.id, repositoryId));
     });

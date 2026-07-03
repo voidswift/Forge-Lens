@@ -15,6 +15,7 @@ export const repositories = pgTable("repositories", {
   watchers: integer("watchers").default(0),
   license: text("license"),
   lastSyncedAt: timestamp("last_synced_at"),
+  busFactor: integer("bus_factor"),
   healthScore: integer("health_score"),
   healthAlgorithmVersion: text("health_algorithm_version"),
   healthEvidence: json("health_evidence"),

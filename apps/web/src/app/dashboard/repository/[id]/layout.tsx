@@ -25,12 +25,12 @@ export default function RepositoryLayout({
           <button disabled className="text-left px-3 py-2 text-gray-400 font-medium text-sm cursor-not-allowed">
             Pull Requests (Coming Soon)
           </button>
-          <button disabled className="text-left px-3 py-2 text-gray-400 font-medium text-sm cursor-not-allowed">
-            Issues (Coming Soon)
-          </button>
-          <button disabled className="text-left px-3 py-2 text-gray-400 font-medium text-sm cursor-not-allowed">
-            Contributors (Coming Soon)
-          </button>
+          <Link
+            href={`/dashboard/repository/${params.id}/contributors`}
+            className="px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium text-sm transition-colors"
+          >
+            Contributors
+          </Link>
         </nav>
       </aside>
 

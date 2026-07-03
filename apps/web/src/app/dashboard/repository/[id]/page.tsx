@@ -82,6 +82,24 @@ export default async function RepositoryPage({
             </>
           )}
         </div>
+
+        {/* Bus Factor */}
+        <div className="shrink-0 bg-red-50 border border-red-200 rounded-lg p-4 w-48 text-center flex flex-col justify-center">
+          <p className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">Bus Factor</p>
+          {repo.busFactor !== null ? (
+            <>
+              <div className="text-3xl font-black text-red-900">{repo.busFactor}</div>
+              <p className="text-xs text-red-600 mt-1">
+                {repo.busFactor <= 2 ? "⚠ High Risk" : "Stable"}
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="text-2xl font-black text-gray-400">UNKNOWN</div>
+              <p className="text-xs text-gray-400 mt-1">Calculating...</p>
+            </>
+          )}
+        </div>
       </div>
 
       {isSyncing && (

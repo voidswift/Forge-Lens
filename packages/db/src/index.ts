@@ -4,12 +4,14 @@ import * as usersSchema from './schemas/users';
 import * as repositoriesSchema from './schemas/repositories';
 import * as commitsSchema from './schemas/commits';
 import * as pullRequestsSchema from './schemas/pull_requests';
+import * as contributorsSchema from './schemas/contributors';
 
 const schema = {
   ...usersSchema,
   ...repositoriesSchema,
   ...commitsSchema,
   ...pullRequestsSchema,
+  ...contributorsSchema,
 };
 
 const connectionString = process.env.DATABASE_URL!;
@@ -20,3 +22,4 @@ export * from './schemas/users';
 export * from './schemas/repositories';
 export * from './schemas/commits';
 export * from './schemas/pull_requests';
+export * from './schemas/contributors';
