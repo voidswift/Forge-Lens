@@ -6,6 +6,9 @@ import { eq } from "drizzle-orm";
 export const syncRepository = inngest.createFunction(
   { 
     id: "sync-repository",
+    concurrency: {
+      limit: 10,
+    },
     retries: 3 
   },
   { event: "repository/sync" },
