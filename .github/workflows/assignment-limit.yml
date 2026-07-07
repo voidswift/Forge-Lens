@@ -1,0 +1,33 @@
+name: Enforce Assignment Limits
+on:
+  issues:
+    types: [assigned]
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+jobs:
+  check-limits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce Max 3 Assignments
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const username = context.payload.assignee ? context.payload.assignee.login : context.payload.sender.login;
+            
+            // Fetch all open issues and PRs assigned to this user
+            const { data: issues } = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${context.repo.owner}/${context.repo.repo} assignee:${username} state:open`
+            });
+            
+            if (issues.total_count > 3) {
+              const message = `@${username} You already have ${issues.total_count} active assignments. To keep the project moving, we limit contributors to 3 active issues/PRs at a time. Please complete your existing tasks first!`;
+              
+              if (context.eventName === 'issues') {
+                await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body: message });
+                await github.rest.issues.removeAssignees({ ...context.repo, issue_number: context.issue.number, assignees: [username] });
+              } else if (context.eventName === 'pull_request') {
+                await github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body: message });
+                await github.rest.pulls.update({ ...context.repo, pull_number: context.payload.pull_request.number, state: 'closed' });
+              }
+            }
