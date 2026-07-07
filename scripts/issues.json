@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Add a loading skeleton state for the Repository Dashboard",
+    "labels": ["good first issue", "easy", "frontend"]
+  },
+  {
+    "title": "Implement a 'Copy to Clipboard' button for Evidence strings",
+    "labels": ["good first issue", "easy", "frontend"]
+  }
+]
