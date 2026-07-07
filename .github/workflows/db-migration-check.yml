@@ -1,0 +1,43 @@
+name: Database Migration Check
+on:
+  pull_request:
+    paths:
+      - 'packages/db/src/schemas/**'
+      - 'packages/db/drizzle.config.ts'
+      - 'packages/db/package.json'
+
+jobs:
+  check-migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: forgelens
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --filter db...
+        
+      # Ponytail: Just push the schema to the ephemeral DB to see if it blows up
+      - name: Dry Run Migration
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/forgelens
+        run: pnpm --filter db run db:push

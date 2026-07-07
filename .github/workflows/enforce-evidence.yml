@@ -1,0 +1,25 @@
+name: Enforce PR Evidence
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  enforce-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Body for Evidence
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = context.payload.pull_request.body;
+            if (!body) {
+              core.setFailed("PR body is empty. Please fill out the PR template.");
+              return;
+            }
+            // Ponytail: ultra simple regex to check if they filled out the numbers
+            const missingBefore = body.includes("TTFV:\nMemory:\nLatency:");
+            const missingAfter = body.includes("New numbers:\n\nTTFV:\nMemory:\nLatency:");
+            
+            if (missingBefore || missingAfter) {
+              core.setFailed("Directive 002 violation: You must provide benchmark evidence in the PR template. Do not leave the metrics blank.");
+            }
