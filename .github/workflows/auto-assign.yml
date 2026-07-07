@@ -1,0 +1,40 @@
+name: Auto Assign Issues
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign First Commenter
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const comment = context.payload.comment.body.trim().toLowerCase();
+            if (comment === '.take' || comment === 'assign to me') {
+              const issue = context.payload.issue;
+              
+              // Only assign if it's currently unassigned
+              if (issue.assignees.length === 0) {
+                const username = context.payload.comment.user.login;
+                
+                await github.rest.issues.addAssignees({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  assignees: [username]
+                });
+                
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  body: `🚀 Assigned to @${username}! Good luck. (Remember, you have 4 days to show progress before it goes back into the pool).`
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  body: `Sorry @${context.payload.comment.user.login}, this issue is already assigned to ${issue.assignees.map(a => '@' + a.login).join(', ')}.`
+                });
+              }
+            }
