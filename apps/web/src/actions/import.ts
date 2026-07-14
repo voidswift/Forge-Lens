@@ -14,6 +14,10 @@ export async function importRepository(prevState: any, formData: FormData) {
     return { error: "Repository name is required." };
   }
 
+  if (repoName.length > 255) {
+    return { error: "Repository name must be 255 characters or less." };
+  }
+
   if (!repoName.includes("/") || repoName.split("/").length !== 2) {
     return { error: "Invalid format. Use owner/repo (e.g., facebook/react)." };
   }

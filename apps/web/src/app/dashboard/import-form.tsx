@@ -20,6 +20,7 @@ export function ImportRepositoryForm() {
           name="repository" 
           placeholder="owner/repo (e.g. facebook/react)" 
           required 
+          maxLength={255}
           className="flex-1 border border-gray-300 px-4 py-2 rounded-lg text-sm outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
         />
         <button 
