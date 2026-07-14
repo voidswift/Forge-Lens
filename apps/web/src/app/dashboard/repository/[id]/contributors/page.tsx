@@ -57,8 +57,29 @@ export default async function ContributorsPage({ params }: { params: { id: strin
         </div>
         
         {profiles.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            No contributors found. If the repository is currently syncing, check back shortly.
+          <div className="flex flex-col items-center justify-center py-16 px-6">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">No contributors yet</h3>
+            <p className="text-sm text-gray-500 text-center max-w-sm mb-4">
+              {repo.syncStatus === "LIVE"
+                ? "This repository has no recorded contributors. This may happen for newly synced repos or due to GitHub API rate limiting."
+                : "Contributor data will appear once the repository finishes syncing."}
+            </p>
+            {repo.syncStatus !== "LIVE" && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                Sync in progress
+              </span>
+            )}
           </div>
         ) : (
           <table className="w-full text-left text-sm whitespace-nowrap">
