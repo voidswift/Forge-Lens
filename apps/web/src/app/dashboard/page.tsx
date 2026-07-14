@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { HealthBadge } from "@/components/health-badge";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -70,9 +71,14 @@ export default async function DashboardPage() {
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${repo.isPrivate ? 'bg-gray-100 text-gray-700' : 'bg-blue-50 text-blue-700'}`}>
                       {repo.isPrivate ? 'Private' : 'Public'}
                     </span>
-                    <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">
-                      {repo.syncStatus}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {repo.healthScore !== null && repo.healthScore !== undefined && (
+                        <HealthBadge score={repo.healthScore} size="sm" />
+                      )}
+                      <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">
+                        {repo.syncStatus}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Link>
