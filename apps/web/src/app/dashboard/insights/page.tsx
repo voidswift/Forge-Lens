@@ -1,5 +1,6 @@
 import { generateAiInsights } from "@/actions/insights";
 import ReactMarkdown from "react-markdown";
+import { PreBlock } from "@/components/copy-button";
 
 export const maxDuration = 30;
 
@@ -13,7 +14,15 @@ export default async function InsightsPage() {
       </div>
       
       <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm prose max-w-none text-gray-800">
-        <ReactMarkdown>{insights}</ReactMarkdown>
+        <ReactMarkdown
+          components={{
+            pre: ({ children, className }) => (
+              <PreBlock className={className}>{children}</PreBlock>
+            ),
+          }}
+        >
+          {insights}
+        </ReactMarkdown>
       </div>
     </div>
   );
