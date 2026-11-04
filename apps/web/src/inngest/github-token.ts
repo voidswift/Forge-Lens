@@ -9,6 +9,12 @@ import { clerkClient } from "@clerk/nextjs/server";
  * Never log or return the result from a `step.run`.
  */
 export async function resolveGithubToken(userId: string, isPrivate: boolean): Promise<string> {
+  if (userId === "showcase") {
+    // Showcase repos are public and owned by no real user.
+    const t = process.env.GITHUB_TOKEN;
+    if (!t) throw new Error("GITHUB_TOKEN is required for showcase repos.");
+    return t;
+  }
   try {
     const client = await clerkClient();
     const tokens = await client.users.getUserOauthAccessToken(userId, "oauth_github");

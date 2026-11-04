@@ -25,6 +25,7 @@ export const repositories = pgTable("repositories", {
   commitsCursor: text("commits_cursor"),
   prsCursor: text("prs_cursor"),
   isSyncing: boolean("is_syncing").default(false),
+  isShowcase: boolean("is_showcase").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -6,7 +6,9 @@
   "scripts": {
     "generate": "drizzle-kit generate",
     "push": "drizzle-kit push",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "migrate": "drizzle-kit migrate",
+    "check": "drizzle-kit check"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

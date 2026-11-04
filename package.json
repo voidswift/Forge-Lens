@@ -6,7 +6,10 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "seed:showcase": "pnpm --filter web seed:showcase",
+    "db:generate": "pnpm --filter @forgelens/db generate",
+    "db:migrate": "pnpm --filter @forgelens/db migrate"
   },
   "devDependencies": {
     "turbo": "2.10.2"

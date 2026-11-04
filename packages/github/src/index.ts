@@ -42,6 +42,32 @@ export class GitHubClient {
     }
   }
 
+  /** One page of commits (newest first). Used for resumable, cursor-based ingestion. */
+  async getCommitsPage(owner: string, repo: string, page: number, perPage = 100, since?: Date) {
+    const { data } = await this.octokit.rest.repos.listCommits({
+      owner,
+      repo,
+      per_page: perPage,
+      page,
+      since: since?.toISOString(),
+    });
+    return data;
+  }
+
+  /** One page of PRs sorted by creation date, newest first. */
+  async getPullRequestsPage(owner: string, repo: string, page: number, perPage = 100) {
+    const { data } = await this.octokit.rest.pulls.list({
+      owner,
+      repo,
+      state: "all",
+      sort: "created",
+      direction: "desc",
+      per_page: perPage,
+      page,
+    });
+    return data;
+  }
+
   /**
    * Async generator that yields commits page by page.
    * Prevents loading 1M commits into memory at once.
