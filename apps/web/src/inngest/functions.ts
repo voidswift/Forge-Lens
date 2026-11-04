@@ -1,6 +1,7 @@
 import { inngest } from "./client";
 import { GitHubClient } from "@forgelens/github";
-import { db, commits, pullRequests, repositories, users } from "@forgelens/db";
+import { db, commits, pullRequests, repositories } from "@forgelens/db";
+import { resolveGithubToken } from "./github-token";
 import { eq } from "drizzle-orm";
 
 export const syncRepository = inngest.createFunction(
@@ -13,11 +14,24 @@ export const syncRepository = inngest.createFunction(
     triggers: [{ event: "repository/sync" }],
   },
   async ({ event, step }) => {
-    const { repositoryId, fullName, githubToken } = event.data;
+    const { repositoryId, fullName, userId } = event.data as {
+      repositoryId: string;
+      fullName: string;
+      userId: string;
+    };
     const owner = fullName.split("/")[0];
     const repo = fullName.split("/")[1];
 
-    const client = new GitHubClient(githubToken);
+    // The client (and token) is created inside each step and never returned
+    // from step.run, so the token is never persisted in step output.
+    const makeClient = async () => {
+      const [row] = await db
+        .select({ isPrivate: repositories.isPrivate })
+        .from(repositories)
+        .where(eq(repositories.id, repositoryId))
+        .limit(1);
+      return new GitHubClient(await resolveGithubToken(userId, row?.isPrivate ?? true));
+    };
     
     // Status: Fetching Commits
     await step.run("status-fetching-commits", async () => {
@@ -26,6 +40,7 @@ export const syncRepository = inngest.createFunction(
 
     // Stream Commits
     await step.run("fetch-and-store-commits", async () => {
+      const client = await makeClient();
       let count = 0;
       for await (const page of client.getCommitsStream(owner, repo)) {
         if (page.length === 0) continue;
@@ -54,6 +69,7 @@ export const syncRepository = inngest.createFunction(
 
     // Stream Pull Requests
     await step.run("fetch-and-store-prs", async () => {
+      const client = await makeClient();
       let count = 0;
       for await (const page of client.getPullRequestsStream(owner, repo)) {
         if (page.length === 0) continue;
@@ -183,27 +199,14 @@ export const reconcileRepositoriesCron = inngest.createFunction(
         .from(repositories);
     });
 
-    const usersWithTokens = await step.run("fetch-user-tokens", async () => {
-      return await db
-        .select({ 
-          id: users.id, 
-          githubToken: users.githubToken 
-        })
-        .from(users);
-    });
-
-    const tokenMap = new Map(usersWithTokens.map(u => [u.id, u.githubToken]));
-
-    const eventsToDispatch = repos
-      .filter(repo => tokenMap.has(repo.userId) && tokenMap.get(repo.userId))
-      .map(repo => ({
-        name: "repository/sync",
-        data: {
-          repositoryId: repo.id,
-          fullName: repo.fullName,
-          githubToken: tokenMap.get(repo.userId)
-        }
-      }));
+    const eventsToDispatch = repos.map((repo) => ({
+      name: "repository/sync",
+      data: {
+        repositoryId: repo.id,
+        fullName: repo.fullName,
+        userId: repo.userId,
+      },
+    }));
 
     if (eventsToDispatch.length > 0) {
       await step.sendEvent("dispatch-syncs", eventsToDispatch);

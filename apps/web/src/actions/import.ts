@@ -74,7 +74,7 @@ export async function importRepository(_prevState: unknown, formData: FormData) 
       data: {
         repositoryId: repoId,
         fullName: githubRepo.full_name,
-        githubToken,
+        userId,
       }
     });
 

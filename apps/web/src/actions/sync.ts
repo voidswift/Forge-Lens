@@ -41,7 +41,7 @@ export async function syncRepositories() {
       data: {
         repositoryId: repo.id.toString(),
         fullName: repo.full_name,
-        githubToken: githubToken
+        userId,
       }
     });
   }
