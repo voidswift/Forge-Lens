@@ -28,6 +28,8 @@ export async function syncRepositories() {
     // Upsert the repository record quickly
     await db.insert(repositories).values({
       id: repo.id.toString(),
+      githubId: repo.id,
+      name: repo.name,
       userId,
       fullName: repo.full_name,
       isPrivate: repo.private,

@@ -10,14 +10,14 @@ export class GitHubClient {
     this.octokit = new MyOctokit({
       auth: token,
       throttle: {
-        onRateLimit: (retryAfter, options: any, octokit, retryCount) => {
+        onRateLimit: (retryAfter, options, octokit, retryCount) => {
           octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
           if (retryCount < 3) {
             octokit.log.info(`Retrying after ${retryAfter} seconds!`);
             return true;
           }
         },
-        onSecondaryRateLimit: (retryAfter, options: any, octokit) => {
+        onSecondaryRateLimit: (retryAfter, options, octokit) => {
           octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
           return true; // Let it automatically retry with backoff
         },
@@ -25,12 +25,19 @@ export class GitHubClient {
     });
   }
 
+  async listRepositories() {
+    return this.octokit.paginate(this.octokit.rest.repos.listForAuthenticatedUser, {
+      per_page: 100,
+      affiliation: "owner",
+    });
+  }
+
   async getRepository(owner: string, repo: string) {
     try {
       const { data } = await this.octokit.rest.repos.get({ owner, repo });
       return data;
-    } catch (e: any) {
-      if (e.status === 404) return null;
+    } catch (e) {
+      if (typeof e === "object" && e !== null && "status" in e && e.status === 404) return null;
       throw e;
     }
   }

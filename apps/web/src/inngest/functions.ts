@@ -9,9 +9,9 @@ export const syncRepository = inngest.createFunction(
     concurrency: {
       limit: 10,
     },
-    retries: 3 
+    retries: 3,
+    triggers: [{ event: "repository/sync" }],
   },
-  { event: "repository/sync" },
   async ({ event, step }) => {
     const { repositoryId, fullName, githubToken } = event.data;
     const owner = fullName.split("/")[0];
@@ -30,11 +30,12 @@ export const syncRepository = inngest.createFunction(
       for await (const page of client.getCommitsStream(owner, repo)) {
         if (page.length === 0) continue;
         
-        const values = page.map((c: any) => ({
+        const values = page.map((c) => ({
           id: c.sha,
           repositoryId,
           message: c.commit.message,
           authorName: c.commit.author?.name || "Unknown",
+          authorEmail: c.commit.author?.email || "",
           url: c.html_url,
           timestamp: new Date(c.commit.author?.date || new Date()),
         }));
@@ -57,8 +58,8 @@ export const syncRepository = inngest.createFunction(
       for await (const page of client.getPullRequestsStream(owner, repo)) {
         if (page.length === 0) continue;
 
-        const values = page.map((pr: any) => ({
-          id: pr.id.toString(),
+        const values = page.map((pr) => ({
+          id: pr.id,
           repositoryId,
           number: pr.number,
           title: pr.title,
@@ -94,7 +95,7 @@ export const syncRepository = inngest.createFunction(
           authorName: c.authorName
         })),
         pullRequests: prData.map(pr => ({
-          id: parseInt(pr.id),
+          id: pr.id,
           createdAt: pr.createdAt,
           updatedAt: pr.updatedAt,
           state: pr.state,
@@ -124,7 +125,7 @@ export const syncRepository = inngest.createFunction(
           score: p.score,
           trend: p.trend,
           expertise: p.expertise,
-          lastActive: p.lastActive,
+          lastActive: new Date(p.lastActive),
           algorithmVersion: healthResult.health.version,
         }));
         await db.insert(contributors).values(values).onConflictDoNothing();
@@ -166,8 +167,10 @@ export const syncRepository = inngest.createFunction(
 
 // Nightly Reconciliation Cron to heal webhook data drift
 export const reconcileRepositoriesCron = inngest.createFunction(
-  { id: "reconcile-repositories-cron" },
-  { cron: "0 0 * * *" }, // Runs every night at midnight UTC
+  {
+    id: "reconcile-repositories-cron",
+    triggers: [{ cron: "0 0 * * *" }], // Runs every night at midnight UTC
+  },
   async ({ step }) => {
     
     const repos = await step.run("fetch-active-repositories", async () => {

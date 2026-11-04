@@ -1,20 +1,21 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 
-export default function RepositoryLayout({
+export default async function RepositoryLayout({
   children,
   params,
 }: {
   children: ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   return (
     <div className="flex flex-col md:flex-row gap-8">
       {/* Sidebar */}
       <aside className="w-full md:w-64 shrink-0">
         <nav className="flex flex-col space-y-1">
           <Link
-            href={`/dashboard/repository/${params.id}`}
+            href={`/dashboard/repository/${id}`}
             className="px-3 py-2 bg-gray-100 text-gray-900 rounded-lg font-medium text-sm"
           >
             Overview
@@ -26,7 +27,7 @@ export default function RepositoryLayout({
             Pull Requests (Coming Soon)
           </button>
           <Link
-            href={`/dashboard/repository/${params.id}/contributors`}
+            href={`/dashboard/repository/${id}/contributors`}
             className="px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium text-sm transition-colors"
           >
             Contributors

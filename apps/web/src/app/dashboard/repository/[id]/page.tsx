@@ -5,6 +5,8 @@ import { SyncPoller } from "./client-poll";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
+type EvidenceResult = { score: number; evidence: string[] };
+
 // Utility to format time ago
 function timeAgo(date: Date) {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
@@ -24,12 +26,13 @@ function timeAgo(date: Date) {
 export default async function RepositoryPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const [repo] = await db.select().from(repositories).where(eq(repositories.id, params.id)).limit(1);
+  const { id } = await params;
+  const [repo] = await db.select().from(repositories).where(eq(repositories.id, id)).limit(1);
 
   if (!repo || repo.userId !== userId) {
     notFound();
@@ -37,13 +40,13 @@ export default async function RepositoryPage({
 
   // Fetch commits and PRs
   const [repoCommits, repoPrs] = await Promise.all([
-    db.select().from(commits).where(eq(commits.repositoryId, params.id)).orderBy(desc(commits.timestamp)).limit(20),
-    db.select().from(pullRequests).where(eq(pullRequests.repositoryId, params.id)).orderBy(desc(pullRequests.createdAt)).limit(20)
+    db.select().from(commits).where(eq(commits.repositoryId, id)).orderBy(desc(commits.timestamp)).limit(20),
+    db.select().from(pullRequests).where(eq(pullRequests.repositoryId, id)).orderBy(desc(pullRequests.createdAt)).limit(20)
   ]);
 
   // Unified Timeline
   const timeline = [
-    ...repoCommits.map(c => ({ type: "commit", id: c.sha, title: c.message, actor: c.authorName, date: c.timestamp })),
+    ...repoCommits.map(c => ({ type: "commit", id: c.id, title: c.message, actor: c.authorName, date: c.timestamp })),
     ...repoPrs.map(pr => ({ type: "pr", id: pr.id.toString(), title: pr.title, actor: pr.authorName, date: pr.createdAt }))
   ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 30);
 
@@ -58,8 +61,8 @@ export default async function RepositoryPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{repo.fullName}</h1>
           <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600">
-            {repo.stars > 0 && <span className="flex items-center gap-1">⭐ {repo.stars}</span>}
-            {repo.forks > 0 && <span>Forks {repo.forks}</span>}
+            {(repo.stars ?? 0) > 0 && <span className="flex items-center gap-1">⭐ {repo.stars}</span>}
+            {(repo.forks ?? 0) > 0 && <span>Forks {repo.forks}</span>}
             {repo.language && <span>{repo.language}</span>}
             {repo.license && <span>{repo.license}</span>}
             <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">Status: {repo.syncStatus}</span>
@@ -159,11 +162,11 @@ export default async function RepositoryPage({
       </div>
 
       {/* Health Evidence Panel */}
-      {!isSyncing && repo.healthEvidence && (
+      {!isSyncing && repo.healthEvidence != null && (
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Why this score?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Object.entries(repo.healthEvidence as any).map(([key, result]: [string, any]) => (
+            {Object.entries(repo.healthEvidence as Record<string, EvidenceResult>).map(([key, result]) => (
               <div key={key}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-700 capitalize">{key}</span>
@@ -187,11 +190,11 @@ export default async function RepositoryPage({
       )}
 
       {/* Resilience Evidence Panel */}
-      {!isSyncing && repo.resilienceEvidence && (
+      {!isSyncing && repo.resilienceEvidence != null && (
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Resilience Insights</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Object.entries(repo.resilienceEvidence as any).map(([key, result]: [string, any]) => (
+            {Object.entries(repo.resilienceEvidence as Record<string, EvidenceResult>).map(([key, result]) => (
               <div key={key}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-700 capitalize">

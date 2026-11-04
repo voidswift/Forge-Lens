@@ -1,5 +1,4 @@
-import { db } from "@forgelens/db";
-import { contributors, repositories } from "@forgelens/db/src/schemas";
+import { db, contributors, repositories } from "@forgelens/db";
 import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
@@ -23,9 +22,10 @@ function getRoleBadge(role: string) {
   return "bg-red-100 text-red-800"; // Inactive
 }
 
-export default async function ContributorsPage({ params }: { params: { id: string } }) {
+export default async function ContributorsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const repo = await db.query.repositories.findFirst({
-    where: eq(repositories.id, params.id),
+    where: eq(repositories.id, id),
   });
 
   if (!repo) {
@@ -33,7 +33,7 @@ export default async function ContributorsPage({ params }: { params: { id: strin
   }
 
   const profiles = await db.query.contributors.findMany({
-    where: eq(contributors.repositoryId, params.id),
+    where: eq(contributors.repositoryId, id),
     orderBy: [desc(contributors.score)],
   });
 
