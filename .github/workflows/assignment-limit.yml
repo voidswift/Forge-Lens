@@ -25,9 +25,5 @@ jobs:
               
               if (context.eventName === 'issues') {
                 await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body: message });
-                await github.rest.issues.removeAssignees({ ...context.repo, issue_number: context.issue.number, assignees: [username] });
-              } else if (context.eventName === 'pull_request') {
-                await github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body: message });
-                await github.rest.pulls.update({ ...context.repo, pull_number: context.payload.pull_request.number, state: 'closed' });
               }
             }
