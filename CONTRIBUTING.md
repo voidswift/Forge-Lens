@@ -1,130 +1,59 @@
-# Contributing to VoidSwift
+# Contributing to ForgeLens
 
-First off, thank you for your interest in contributing to **VoidSwift**! ❤️
+Thanks for being here! Whether you fix a typo or ship a feature, you're welcome. This guide is short on purpose.
 
-Whether you're fixing bugs, improving documentation, or adding new features, every contribution helps make the project better. Please read these guidelines before getting started.
+## Our promise
 
----
+**You will get a first maintainer response on your pull request within 72 hours.** We never auto-close PRs for inactivity. If you haven't heard from us in 72 hours, ping a maintainer in the PR or on Discord. That's on us, not you.
 
-# Getting Started
+## Pick an issue
 
-1. Fork the repository.
-2. Clone your fork locally.
-3. Create a new branch from the default branch.
-4. Make your changes.
-5. Test your changes (if applicable).
-6. Commit your changes with a clear commit message.
-7. Push your branch and open a Pull Request.
+1. Browse issues labelled `good first issue` (starter ideas live in [docs/GOOD_FIRST_ISSUES.md](docs/GOOD_FIRST_ISSUES.md)).
+2. Comment `.take` on an unassigned issue and you are assigned automatically.
+3. Please hold at most 3 assigned issues at a time. If you can't continue, just say so and we'll free it up. Assigned issues quiet for 14 days get unassigned (never closed), so someone else can pick them up.
+4. Want to do something bigger? Open an issue first so we can agree on the approach.
 
----
+## Set up locally (about 10 minutes)
 
-# Before You Start
+Follow "Quick start" in the [README](README.md). You need Node 20+, pnpm 9 and Docker.
 
-* Search existing issues before opening a new one.
-* If you're planning a large feature or significant change, open an issue first so we can discuss the best approach.
-* Keep each Pull Request focused on a single feature or fix.
-* Read this document completely before contributing.
+## Run the checks locally
 
----
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
 
-# Contribution Limits
+Run all four before pushing; they are the same steps CI runs.
 
-To keep contributions active and ensure everyone gets a chance to contribute:
+## What CI checks, and why
 
-* A contributor may have **up to 3 assigned issues** at any given time.
-* A contributor may have **up to 3 open Pull Requests** at any given time.
-* If you are unable to continue working on an assigned issue, please let us know so it can be reassigned.
-* Issues that remain **inactive for 2-3 days** without any progress or updates may be **unassigned**.
-* Pull Requests that remain **inactive for 2-3 days** without responding to review comments or showing progress may be **closed**.
+| Check | Why |
+| --- | --- |
+| `pnpm lint` | Consistent code style and common bug patterns. |
+| `pnpm typecheck` | TypeScript errors across every package, caught before runtime. |
+| `pnpm test` | The scoring engine in `packages/domain-analytics` must stay correct. |
+| `pnpm build` | The app has to compile. |
+| DB migration check | If you touch `packages/db/src/schemas`, run `pnpm db:generate` and commit the new migration. |
+| PR evidence (only for performance work) | PRs labelled `perf`, or touching `packages/github`, `apps/web/src/inngest` or `packages/db/src`, need before/after numbers. Use the template `.github/PULL_REQUEST_TEMPLATE/perf.md` (add `?template=perf.md` to the PR URL). UI and docs PRs skip this. |
 
-> **Waiting for Review?**
->
-> If your Pull Request is waiting for a maintainer's review and you haven't received any response within **2-3 days**, please join our **VoidSwift Discord** and politely ping a **Maintainer** or **Project Admin**. This helps ensure your PR isn't accidentally missed.
+Green means the code works; red means something real is wrong.
 
----
+## Pull requests
 
-# Pull Request Guidelines
+- One issue or feature per PR. Link it with `Closes #123`.
+- Use [Conventional Commits](https://www.conventionalcommits.org/) (`fix(web): ...`, `docs: ...`).
+- Fill in the short template: What / Why / How tested / Screenshots.
+- Never invent numbers (scores, benchmarks) in docs or UI. Scores come only from `packages/domain-analytics`, never from an LLM.
 
-Before opening a Pull Request, please ensure that:
+## Reporting bugs and requesting features
 
-* Your PR solves only **one issue** or introduces **one feature**.
-* Your branch is up to date with the default branch.
-* Your commit messages are meaningful and descriptive.
-* You link related issues using:
+Search existing issues first. For bugs include steps to reproduce, expected vs. actual behavior, and your environment. For features, describe the problem before the solution.
 
-  * `Closes #123`
-  * `Fixes #123`
-* You update documentation if your changes require it.
-* Your code follows the project's existing style.
-* Your PR is ready for review.
+## Community and conduct
 
----
+Chat with maintainers on the project Discord. Be respectful, constructive and welcoming. Harassment, abuse and spam are not tolerated.
 
-# Code Style
-
-Please follow the existing coding style of the project.
-
-* Write clean and readable code.
-* Avoid unnecessary refactoring.
-* Keep changes focused.
-* Add tests whenever possible, especially for bug fixes.
-* Remove debugging code before submitting your PR.
-
----
-
-# Good First Contributions
-
-If you're new to the project, look for issues labeled:
-
-* `good first issue`
-* `help wanted`
-
-These issues are intended for new contributors.
-
----
-
-# Reporting Bugs
-
-When opening a bug report, please include:
-
-* Clear description of the issue.
-* Steps to reproduce.
-* Expected behavior.
-* Actual behavior.
-* Screenshots or logs (if applicable).
-* Environment details (OS, version, etc.).
-
----
-
-# Feature Requests
-
-Before requesting a feature:
-
-* Check existing issues to avoid duplicates.
-* Clearly explain the problem you're trying to solve.
-* Describe your proposed solution.
-* Include any additional context if needed.
-
----
-
-# Community
-
-For discussions, support, announcements, and faster communication, please join the **VoidSwift Discord**.
-
-If you're actively contributing, we highly recommend joining the Discord server so maintainers can communicate with you easily regarding reviews, changes, or issue assignments.
-
----
-
-# Code of Conduct
-
-Please be respectful, constructive, and welcoming.
-
-Harassment, abusive language, spam, or toxic behavior will not be tolerated. We want VoidSwift to be a friendly and inclusive community for everyone.
-
----
-
-# Thank You ❤️
-
-Every contribution, whether it's code, documentation, bug reports, or suggestions, helps improve VoidSwift.
-
-Thank you for being part of our community. Happy coding! 🚀
+Thank you for helping make ForgeLens better!
