@@ -2,13 +2,14 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "seed:showcase": "tsx --env-file=.env.local scripts/seed-showcase.ts"
+    "seed:showcase": "tsx --env-file=.env.local scripts/seed-showcase.mts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.12",

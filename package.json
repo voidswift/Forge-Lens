@@ -9,7 +9,8 @@
     "test": "turbo run test",
     "seed:showcase": "pnpm --filter web seed:showcase",
     "db:generate": "pnpm --filter @forgelens/db generate",
-    "db:migrate": "pnpm --filter @forgelens/db migrate"
+    "db:migrate": "pnpm --filter @forgelens/db migrate",
+    "setup": "pnpm install && docker compose up -d --wait && pnpm db:migrate"
   },
   "devDependencies": {
     "turbo": "2.10.2"

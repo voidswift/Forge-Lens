@@ -70,7 +70,7 @@ async function main() {
       const res = await computeAndPersist(repositoryId);
       console.log(`  health=${res.healthScore} resilience=${res.resilienceScore} busFactor=${res.busFactor}`);
     } catch (e) {
-      console.error(`  failed: ${e instanceof Error ? e.message : e}`);
+      console.error(`  failed: ${(e instanceof Error ? e.message : String(e)).slice(0, 300)}`);
       await db.update(repositories).set({ syncStatus: "FAILED" }).where(eq(repositories.id, repositoryId));
     }
   }

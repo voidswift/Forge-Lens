@@ -24,7 +24,7 @@ CREATE TABLE "contributors" (
 );
 --> statement-breakpoint
 CREATE TABLE "pull_requests" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
 	"repository_id" text NOT NULL,
 	"number" integer NOT NULL,
 	"title" text NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE "pull_requests" (
 CREATE TABLE "repositories" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
-	"github_id" integer NOT NULL,
+	"github_id" bigint NOT NULL,
 	"name" text NOT NULL,
 	"full_name" text NOT NULL,
 	"is_private" boolean NOT NULL,

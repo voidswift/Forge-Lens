@@ -35,7 +35,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ owner: s
   }
 
   if (score === null) {
-    return new Response(renderBadge("ForgeLens", "not analyzed", "#9f9f9f"), { headers });
+    // Short cache so a repo that gets analyzed soon after doesn't show stale text for hours.
+    return new Response(renderBadge("ForgeLens", "not analyzed", "#9f9f9f"), {
+      headers: { ...headers, "Cache-Control": "public, max-age=300, s-maxage=300" },
+    });
   }
   return new Response(renderBadge("ForgeLens", `health ${score}`, healthTier(score).color), { headers });
 }

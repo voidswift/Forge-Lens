@@ -1,0 +1,20 @@
+# Local Postgres for development. Matches the Postgres major version used in production docs.
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: forgelens
+      POSTGRES_PASSWORD: forgelens
+      POSTGRES_DB: forgelens
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forgelens"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

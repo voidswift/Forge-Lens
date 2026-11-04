@@ -9,9 +9,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         
         <nav className="flex-1 flex gap-6 text-sm font-medium">
           <Link href="/dashboard" className="text-gray-600 hover:text-black transition-colors">Overview</Link>
-          <Link href="/dashboard/insights" className="text-indigo-600 hover:text-indigo-900 transition-colors flex items-center gap-2">
-            ✨ AI Insights
-          </Link>
+          {process.env.OPENAI_API_KEY && (
+            <Link href="/dashboard/insights" className="text-indigo-600 hover:text-indigo-900 transition-colors flex items-center gap-2">
+              ✨ AI Insights
+            </Link>
+          )}
         </nav>
 
         <UserButton />

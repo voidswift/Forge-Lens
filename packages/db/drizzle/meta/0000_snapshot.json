@@ -1,5 +1,5 @@
 {
-  "id": "5de4bc43-2da6-43b8-8aa9-1d1e73b1ce92",
+  "id": "51ea5179-80b6-40ed-b287-62f0a7e12a8b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -218,7 +218,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": true,
           "notNull": true
         },
@@ -371,7 +371,7 @@
         },
         "github_id": {
           "name": "github_id",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
