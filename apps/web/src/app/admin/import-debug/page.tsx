@@ -1,5 +1,4 @@
-import { db } from "@forgelens/db";
-import { repositories } from "@forgelens/db/schemas/repositories";
+import { db, repositories } from "@forgelens/db";
 import { desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";

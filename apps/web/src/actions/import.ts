@@ -7,7 +7,7 @@ import { GitHubClient } from "@forgelens/github";
 import { inngest } from "@/inngest/client";
 import { revalidatePath } from "next/cache";
 
-export async function importRepository(prevState: any, formData: FormData) {
+export async function importRepository(_prevState: unknown, formData: FormData) {
   const repoName = formData.get("repository")?.toString().trim();
   
   if (!repoName) {
@@ -74,14 +74,14 @@ export async function importRepository(prevState: any, formData: FormData) {
       data: {
         repositoryId: repoId,
         fullName: githubRepo.full_name,
-        githubToken,
+        userId,
       }
     });
 
     revalidatePath("/dashboard");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Import error:", error);
-    return { error: error.message || "Failed to import repository." };
+    return { error: error instanceof Error ? error.message : "Failed to import repository." };
   }
 }

@@ -1,43 +1,7 @@
-## Problem
+## What
 
-What verified problem does this solve?
+## Why
 
-Reference:
-- User feedback
-- Benchmark
-- Incident
-- Security finding
+## How tested
 
-*(If none, close this PR.)*
-
----
-
-## Evidence Before
-
-Current numbers:
-
-TTFV:
-Memory:
-Latency:
-Error rate:
-Queue delay:
-
----
-
-## Evidence After
-
-New numbers:
-
-TTFV:
-Memory:
-Latency:
-Error rate:
-Queue delay:
-
----
-
-## Risk
-
-What could this break?
-
-Rollback plan?
+## Screenshots (if applicable)

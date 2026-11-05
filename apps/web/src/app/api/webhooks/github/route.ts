@@ -25,7 +25,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const payload = JSON.parse(body);
+  const payload = JSON.parse(body) as {
+    repository: { id: number };
+    commits: Array<{
+      id: string;
+      message: string;
+      author: { name: string; email: string };
+      url: string;
+      timestamp: string;
+    }>;
+    pull_request: {
+      id: number;
+      number: number;
+      title: string;
+      state: string;
+      html_url: string;
+      user: { login: string };
+      created_at: string;
+      updated_at: string;
+    };
+  };
 
   try {
     if (event === "push") {
@@ -39,7 +58,7 @@ export async function POST(req: NextRequest) {
       
       if (!repoExists) return NextResponse.json({ status: "Ignored" }, { status: 200 });
 
-      const commitsToInsert = payload.commits.map((commit: any) => ({
+      const commitsToInsert = payload.commits.map((commit) => ({
         id: commit.id,
         repositoryId: repoExists.id,
         message: commit.message,

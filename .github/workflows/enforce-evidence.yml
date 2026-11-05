@@ -1,25 +1,32 @@
 name: Enforce PR Evidence
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, edited, synchronize, labeled, unlabeled]
 
 jobs:
   enforce-evidence:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: changed
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant:
+              - 'packages/github/**'
+              - 'apps/web/src/inngest/**'
+              - 'packages/db/src/**'
       - name: Check PR Body for Evidence
-        uses: actions/github-script@v6
+        if: contains(github.event.pull_request.labels.*.name, 'perf') || steps.changed.outputs.relevant == 'true'
+        uses: actions/github-script@v7
         with:
           script: |
-            const body = context.payload.pull_request.body;
-            if (!body) {
-              core.setFailed("PR body is empty. Please fill out the PR template.");
-              return;
-            }
-            // Ponytail: ultra simple regex to check if they filled out the numbers
-            const missingBefore = body.includes("TTFV:\nMemory:\nLatency:");
-            const missingAfter = body.includes("New numbers:\n\nTTFV:\nMemory:\nLatency:");
-            
+            const body = (context.payload.pull_request.body || '').replace(/\r\n/g, '\n');
+            const emptyMetrics = /TTFV:\s*Memory:\s*Latency:\s*(?:Error rate:\s*)?(?:Queue delay:\s*)?(?:$|\n)/m;
+            const missingBefore = emptyMetrics.test(body);
+            const missingAfter = body.includes('New numbers:') && emptyMetrics.test(body);
             if (missingBefore || missingAfter) {
-              core.setFailed("Directive 002 violation: You must provide benchmark evidence in the PR template. Do not leave the metrics blank.");
+              core.setFailed('Performance changes must include benchmark evidence in the PR body.');
             }

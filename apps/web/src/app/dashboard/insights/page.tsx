@@ -1,9 +1,12 @@
 import { generateAiInsights } from "@/actions/insights";
 import ReactMarkdown from "react-markdown";
+import { notFound } from "next/navigation";
 
 export const maxDuration = 30;
 
 export default async function InsightsPage() {
+  // AI is optional: without a key the page (and its nav item) simply does not exist.
+  if (!process.env.OPENAI_API_KEY) notFound();
   const insights = await generateAiInsights();
 
   return (

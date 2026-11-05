@@ -5,10 +5,15 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "seed:showcase": "pnpm --filter web seed:showcase",
+    "db:generate": "pnpm --filter @forgelens/db generate",
+    "db:migrate": "pnpm --filter @forgelens/db migrate",
+    "setup": "pnpm install && docker compose up -d --wait && pnpm db:migrate"
   },
   "devDependencies": {
-    "turbo": "latest"
+    "turbo": "2.10.2"
   },
   "packageManager": "pnpm@9.0.0"
 }

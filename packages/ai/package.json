@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "ai": "^3.4.0",
     "@ai-sdk/openai": "^0.0.66",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "latest"
+    "typescript": "6.0.3"
   }
 }

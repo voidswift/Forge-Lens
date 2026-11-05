@@ -1,9 +1,9 @@
-import { pgTable, text, timestamp, boolean, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, bigint, json } from "drizzle-orm/pg-core";
 
 export const repositories = pgTable("repositories", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
-  githubId: integer("github_id").notNull().unique(),
+  githubId: bigint("github_id", { mode: "number" }).notNull().unique(),
   name: text("name").notNull(),
   fullName: text("full_name").notNull(),
   isPrivate: boolean("is_private").notNull(),
@@ -25,6 +25,7 @@ export const repositories = pgTable("repositories", {
   commitsCursor: text("commits_cursor"),
   prsCursor: text("prs_cursor"),
   isSyncing: boolean("is_syncing").default(false),
+  isShowcase: boolean("is_showcase").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
